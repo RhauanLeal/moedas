@@ -7,7 +7,7 @@ Django 5.2 + HTMX + PostgreSQL, rodando em Docker.
 - **Um toque** numa moeda que você não tem marca 1 unidade.
 - **Toque numa moeda que você tem** abre a ficha: quantidade (− / +), estado de conservação (UTGC, BC, MBC, SOB, FC), data e observação.
 - **Faltando**: lista tudo o que ainda falta, por série.
-- **Contas**: cada pessoa tem a sua coleção. Cadastro por e-mail ou "Continuar com Google".
+- **Contas**: cada pessoa tem a sua coleção. Cadastro por e-mail ou "Continuar com Google", Apple ou Microsoft.
 - **App instalável (PWA)**: ícone na tela inicial, tela cheia e páginas já visitadas abrem sem internet.
 - **Notificações**: aviso no celular quando sai moeda nova (você dispara pelo admin).
 - **Admin** (`/admin/`): cadastrar moedas novas (ex.: 2027 ou uma nova comemorativa) e mandar avisos.
@@ -122,6 +122,39 @@ GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxx
 5. Recrie o container (`docker compose up -d`). O botão "Continuar com Google" aparece sozinho.
 
 Se alguém entra com o Google usando o mesmo e-mail de uma conta já cadastrada, as duas viram uma só.
+
+### Login com Microsoft (opcional, gratuito)
+
+1. Acesse **portal.azure.com › Microsoft Entra ID › Registros de aplicativo › Novo registro**.
+2. Tipos de conta: **Contas em qualquer diretório organizacional e contas pessoais da Microsoft**.
+3. URI de redirecionamento (tipo **Web**): `https://moedas.linario.dev.br/contas/microsoft/login/callback/`
+   (para testar no PC: `http://localhost:8020/contas/microsoft/login/callback/`).
+4. Copie o **ID do aplicativo (cliente)** e, em **Certificados e segredos › Novo segredo do cliente**, o **Valor** do segredo:
+
+```dotenv
+MICROSOFT_CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+MICROSOFT_CLIENT_SECRET=xxxxxxxx
+```
+
+A Microsoft não confirma o e-mail, então quem entra por ela com um e-mail já cadastrado **não** é ligado à conta antiga automaticamente.
+
+### Login com Apple (opcional, exige conta paga)
+
+Precisa do **Apple Developer Program (US$ 99/ano)** e só funciona em HTTPS (não em localhost).
+
+1. Em developer.apple.com › Identifiers, crie um **App ID** e depois um **Services ID** (esse é o `APPLE_CLIENT_ID`).
+   No Services ID ative "Sign in with Apple", domínio `moedas.linario.dev.br` e retorno `https://moedas.linario.dev.br/contas/apple/login/callback/`.
+2. Em Keys, crie uma chave com "Sign in with Apple" e baixe o arquivo `.p8` (só dá para baixar uma vez). O **Key ID** aparece na chave; o **Team ID** fica no canto superior direito da conta.
+3. No `.env` (a chave `.p8` vai numa linha só, com `\n` no lugar das quebras de linha):
+
+```dotenv
+APPLE_CLIENT_ID=br.dev.linario.moedas.web
+APPLE_TEAM_ID=ABCDE12345
+APPLE_KEY_ID=ABC123DEFG
+APPLE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIGT...\n-----END PRIVATE KEY-----
+```
+
+Depois de configurar qualquer provedor, recrie o container (`docker compose up -d`): os botões aparecem sozinhos.
 
 ## 5. Notificações
 

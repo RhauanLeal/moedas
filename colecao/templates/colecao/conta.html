@@ -13,7 +13,7 @@
         <a href="{% url 'account_set_password' %}">Criar uma senha (para entrar sem o Google)</a>
       {% endif %}
       <a href="{% url 'account_email' %}">E-mails da conta</a>
-      {% if google_ativo %}<a href="{% url 'socialaccount_connections' %}">Contas conectadas (Google)</a>{% endif %}
+      {% if provedores_sociais %}<a href="{% url 'socialaccount_connections' %}">Contas conectadas</a>{% endif %}
       {% if user.is_staff %}<a href="{% url 'admin:index' %}">Administração (catálogo e avisos)</a>{% endif %}
     </div>
   </section>

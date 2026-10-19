@@ -164,6 +164,26 @@ class ContasTests(TestCase):
         )
         self.assertFalse(User.objects.filter(email="x@ex.com").exists())
 
+    def test_login_sem_provedores_nao_mostra_botoes(self):
+        html = self.client.get(reverse("account_login")).content.decode()
+        self.assertNotIn("btn-social", html)
+
+    def test_login_mostra_botoes_dos_provedores_configurados(self):
+        apps = [{"client_id": "x", "secret": "y", "key": ""}]
+        provedores = {
+            "google": {"APPS": apps},
+            "microsoft": {"APPS": apps},
+            "apple": {"APPS": [{"client_id": "x", "secret": "kid", "key": "team",
+                                "settings": {"certificate_key": "k"}}]},
+        }
+        with override_settings(SOCIALACCOUNT_PROVIDERS=provedores):
+            for nome in ["account_login", "account_signup"]:
+                html = self.client.get(reverse(nome)).content.decode()
+                for rotulo in ["Google", "Apple", "Microsoft"]:
+                    self.assertIn(f"Continuar com {rotulo}", html, nome)
+                self.assertIn("/contas/microsoft/login/", html)
+                self.assertIn("/contas/apple/login/", html)
+
     def test_telas_publicas(self):
         for nome in ["account_login", "account_signup", "privacidade", "offline", "manifest", "service_worker"]:
             self.assertEqual(self.client.get(reverse(nome)).status_code, 200, nome)

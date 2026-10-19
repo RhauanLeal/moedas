@@ -255,18 +255,21 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .auth h1 { font-size: 26px; margin-bottom: 4px; }
 .auth-sub { color: var(--texto-2); margin: 0 0 20px; }
 .auth label { display: block; font-size: 14px; font-weight: 600; color: var(--texto-2); margin: 14px 0 6px; }
-.auth form button[type=submit]:not(.btn-google):not(.btn), .auth .btn { width: 100%; margin-top: 20px; }
-.auth form button[type=submit]:not(.btn-google):not(.btn) {
+.auth form button[type=submit]:not(.btn-social):not(.btn), .auth .btn { width: 100%; margin-top: 20px; }
+.auth form button[type=submit]:not(.btn-social):not(.btn) {
   min-height: 50px; border-radius: 14px; border: 0; cursor: pointer;
   font: 700 16px inherit; background: var(--destaque); color: #fff;
 }
 .auth p { line-height: 1.5; }
 .auth ul.errorlist, .auth .errorlist { color: var(--perigo); padding-left: 18px; font-size: 14px; }
-.btn-google {
+.social { display: flex; flex-direction: column; gap: 10px; }
+.btn-social {
   width: 100%; min-height: 50px; border-radius: 14px; cursor: pointer;
   display: flex; align-items: center; justify-content: center; gap: 10px;
   font: 600 16px inherit; background: #fff; color: #1f1f1f; border: 1.5px solid #dadce0;
 }
+.btn-apple { background: #000; color: #fff; border-color: #000; }
+.btn-microsoft { background: #fff; color: #5e5e5e; border-color: #8c8c8c; }
 .ou { display: flex; align-items: center; gap: 12px; color: var(--texto-2); font-size: 13px; margin: 20px 0 4px; }
 .ou::before, .ou::after { content: ""; flex: 1; height: 1px; background: var(--linha); }
 .auth-links { text-align: center; margin-top: 18px; }

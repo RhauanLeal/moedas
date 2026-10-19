@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.microsoft",
+    "allauth.socialaccount.providers.apple",
     "colecao",
 ]
 
@@ -144,6 +146,32 @@ if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
         "SCOPE": ["profile", "email"],
         "AUTH_PARAMS": {"access_type": "online"},
         "OAUTH_PKCE_ENABLED": True,
+    }
+
+# Login com Microsoft (contas pessoais Outlook/Hotmail e contas de trabalho/escola).
+# O e-mail da Microsoft não vem marcado como verificado, então não conecta sozinho a uma conta existente.
+MICROSOFT_CLIENT_ID = os.environ.get("MICROSOFT_CLIENT_ID", "")
+MICROSOFT_CLIENT_SECRET = os.environ.get("MICROSOFT_CLIENT_SECRET", "")
+if MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET:
+    SOCIALACCOUNT_PROVIDERS["microsoft"] = {
+        "APPS": [{"client_id": MICROSOFT_CLIENT_ID, "secret": MICROSOFT_CLIENT_SECRET, "key": ""}],
+        "TENANT": "common",
+        "SCOPE": ["User.Read"],
+    }
+
+# Login com Apple (exige Apple Developer Program e site em HTTPS; não funciona em localhost).
+APPLE_CLIENT_ID = os.environ.get("APPLE_CLIENT_ID", "")  # "Services ID"
+APPLE_KEY_ID = os.environ.get("APPLE_KEY_ID", "")
+APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID", "")
+APPLE_PRIVATE_KEY = os.environ.get("APPLE_PRIVATE_KEY", "").replace("\\n", "\n")  # conteúdo do .p8
+if APPLE_CLIENT_ID and APPLE_KEY_ID and APPLE_TEAM_ID and APPLE_PRIVATE_KEY:
+    SOCIALACCOUNT_PROVIDERS["apple"] = {
+        "APPS": [{
+            "client_id": APPLE_CLIENT_ID,
+            "secret": APPLE_KEY_ID,
+            "key": APPLE_TEAM_ID,
+            "settings": {"certificate_key": APPLE_PRIVATE_KEY},
+        }],
     }
 
 # E-mail (recuperar senha / confirmar cadastro). Sem EMAIL_HOST, os e-mails só saem no log.

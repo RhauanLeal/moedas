@@ -5,7 +5,7 @@ Responda sempre em português do Brasil.
 
 ## Stack
 - Python 3.12, Django 5.2, HTMX 2 (arquivo local em `static/js/htmx.min.js`), PostgreSQL
-- django-allauth 65 (login por e-mail e Google), pywebpush (notificações Web Push / VAPID)
+- django-allauth 65 (login por e-mail, Google, Microsoft e Apple), pywebpush (notificações Web Push / VAPID)
 - Docker (`Dockerfile` + `docker-compose.yml`), gunicorn, whitenoise
 - Sem framework JS/CSS: `static/css/app.css` (variáveis CSS, modo escuro) e `static/js/app.js`
 
