@@ -1,0 +1,35 @@
+<form class="ficha" hx-post="{% url 'ficha' moeda.pk %}" hx-target="#ficha-conteudo" hx-swap="innerHTML">
+  {% csrf_token %}
+  <div class="alca"></div>
+  <p class="titulo">{{ moeda.denominacao }} · {{ moeda.ano_rotulo }}</p>
+  <p class="sub">{{ moeda.serie }}{% if moeda.descricao %} — {{ moeda.descricao }}{% endif %}</p>
+
+  <label for="{{ form.quantidade.id_for_label }}">{{ form.quantidade.label }}</label>
+  <div class="contador">
+    <button type="button" data-delta="-1" data-alvo="{{ form.quantidade.id_for_label }}" aria-label="Diminuir">−</button>
+    {{ form.quantidade }}
+    <button type="button" data-delta="1" data-alvo="{{ form.quantidade.id_for_label }}" aria-label="Aumentar">+</button>
+  </div>
+  {% for e in form.quantidade.errors %}<p class="erro">{{ e }}</p>{% endfor %}
+
+  <label for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
+  {{ form.estado }}
+
+  <label for="{{ form.adquirida_em.id_for_label }}">{{ form.adquirida_em.label }}</label>
+  {{ form.adquirida_em }}
+  {% for e in form.adquirida_em.errors %}<p class="erro">{{ e }}</p>{% endfor %}
+
+  <label for="{{ form.observacao.id_for_label }}">{{ form.observacao.label }}</label>
+  {{ form.observacao }}
+
+  <div class="acoes">
+    <button class="btn sec" type="button" onclick="document.getElementById('ficha').close()">Fechar</button>
+    <button class="btn" type="submit">Salvar</button>
+  </div>
+  {% if item.quantidade %}
+  <div class="acoes">
+    <button class="btn perigo" type="submit" name="acao" value="remover"
+            onclick="return confirm('Tirar {{ moeda.denominacao }} {{ moeda.ano_rotulo }} da coleção?')">Não tenho mais</button>
+  </div>
+  {% endif %}
+</form>

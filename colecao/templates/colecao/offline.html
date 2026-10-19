@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titulo %}Sem internet · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <div class="auth" style="text-align:center">
+    <h1>Sem internet</h1>
+    <p class="auth-sub">Esta página ainda não foi aberta neste aparelho, então não está guardada para uso offline. As telas que você já visitou continuam abrindo sem internet.</p>
+    <button class="btn" type="button" onclick="location.reload()">Tentar de novo</button>
+  </div>
+{% endblock %}

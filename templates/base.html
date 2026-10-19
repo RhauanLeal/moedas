@@ -1,0 +1,51 @@
+{% load static %}<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#7a4a12">
+  <meta name="description" content="Controle da sua coleção de moedas do Plano Real.">
+  <title>{% block titulo %}Moedas do Real{% endblock %}</title>
+  <link rel="manifest" href="{% url 'manifest' %}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{% static 'icones/icone-192.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'icones/apple-touch-icon.png' %}">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Moedas">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}" defer></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' data-logado="{% if user.is_authenticated %}1{% else %}0{% endif %}">
+  {% if user.is_authenticated %}
+  {% with rota=request.resolver_match.url_name %}
+  <header class="topo">
+    <a class="marca" href="{% url 'inicio' %}">Moedas <span>do Real</span></a>
+    <nav>
+      <button type="button" class="instalar" data-instalar hidden>Instalar</button>
+      <a href="{% url 'faltando' %}" {% if rota == 'faltando' %}class="ativo"{% endif %}>Faltando</a>
+      <a href="{% url 'novidades' %}" class="icone{% if rota == 'novidades' %} ativo{% endif %}" aria-label="Novidades" title="Novidades">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      </a>
+      <a href="{% url 'conta' %}" class="icone{% if rota == 'conta' or rota == 'excluir_conta' %} ativo{% endif %}" aria-label="Minha conta" title="Minha conta">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      </a>
+    </nav>
+  </header>
+  {% endwith %}
+  {% endif %}
+
+  {% if messages %}
+  <div class="flashes" role="status">
+    {% for message in messages %}<div class="aviso-flash {{ message.tags }}">{{ message }}</div>{% endfor %}
+  </div>
+  {% endif %}
+
+  <main>{% block conteudo %}{% endblock %}</main>
+
+  <dialog id="ficha" aria-label="Ficha da moeda">
+    <div id="ficha-conteudo"></div>
+  </dialog>
+  {% block extra_body %}{% endblock %}
+</body>
+</html>

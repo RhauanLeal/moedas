@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titulo %}Novidades · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <h1>Novidades</h1>
+  {% include "colecao/_notificacoes.html" %}
+
+  <h2>Avisos</h2>
+  {% for a in avisos %}
+    <a class="aviso-card" href="{{ a.link|default:'#' }}">
+      <div class="aviso-titulo">{{ a.titulo }}</div>
+      <div class="aviso-texto">{{ a.texto }}</div>
+      <time datetime="{{ a.criado_em|date:'c' }}">{{ a.criado_em|date:"d/m/Y" }}</time>
+    </a>
+  {% empty %}
+    <p class="vazio">Nenhuma novidade por enquanto. Quando sair moeda nova, ela aparece aqui.</p>
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% if grupos is None %}{% elif not grupos %}
+  <p class="vazio">Nenhuma moeda do catálogo bate com “{{ q }}”. Se for uma moeda nova, cadastre em <a href="{% url 'admin:colecao_moeda_add' %}">Admin › Moedas</a>.</p>
+{% else %}
+  {% for g in grupos %}
+    <section class="grupo-resultado">
+      <h3><a href="{% url 'serie' g.serie.pk %}">{{ g.serie }}</a></h3>
+      {% for denominacao, moedas in g.por_denominacao %}
+        {% if g.por_denominacao|length > 1 or g.serie.tipo == "FAMILIA" %}<p class="vazio" style="padding:2px 0 6px;margin:0">{{ denominacao }}</p>{% endif %}
+        <div class="chips{% if moedas.0.descricao %} largos{% endif %}" style="margin-bottom:8px">
+          {% for m in moedas %}{% include "colecao/_chip.html" %}{% endfor %}
+        </div>
+      {% endfor %}
+    </section>
+  {% endfor %}
+{% endif %}

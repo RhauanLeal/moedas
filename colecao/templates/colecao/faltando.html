@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block titulo %}Faltando · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <h1>O que falta</h1>
+  {% include "colecao/_barra.html" with dados=progresso serie=None %}
+  {% for g in grupos %}
+    <h2><a href="{% url 'serie' g.serie.pk %}" style="color:inherit;text-decoration:none">{{ g.serie }}</a></h2>
+    {% include "colecao/_grupos_denominacao.html" with grupos=g.por_denominacao %}
+  {% empty %}
+    <p class="vazio">Coleção completa! 🎉</p>
+  {% endfor %}
+{% endblock %}

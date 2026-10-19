@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block conteudo %}
+  {% include "colecao/_barra.html" with dados=progresso serie=None %}
+
+  <div class="busca">
+    <input type="search" name="q" placeholder="Achei uma moeda… ex.: 50 2008" autocomplete="off"
+           hx-get="{% url 'buscar' %}" hx-trigger="input changed delay:250ms, search" hx-target="#resultados">
+    <small>Digite valor e/ou ano (<b>50 2008</b>, <b>1 real 2019</b>, <b>5c 2019a</b>) ou tema (<b>natação</b>, <b>banco central</b>). Toque na moeda para marcar.</small>
+  </div>
+  <div id="resultados"></div>
+
+  {% for rotulo, series in secoes %}
+    <h2>{{ rotulo }}</h2>
+    <div class="series">
+      {% for s in series %}
+        <a class="serie-card{% if s.tenho == s.total %} completa{% endif %}" href="{% url 'serie' s.pk %}">
+          <div class="linha1">{{ s.nome }}<span>{{ s.tenho }}/{{ s.total }}{% if s.tenho == s.total %} ✓{% endif %}</span></div>
+          <div class="barra"><i style="width: {% widthratio s.tenho s.total 100 %}%"></i></div>
+        </a>
+      {% endfor %}
+    </div>
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{# Faz as telas do allauth (recuperar senha, confirmar e-mail, sair etc.) usarem o visual do app. #}
+{% block titulo %}{% block head_title %}{% endblock head_title %} · Moedas do Real{% endblock %}
+{% block extra_head %}{% block allauth_extra_head %}{% endblock %}{% endblock %}
+{% block conteudo %}
+  <div class="auth">
+    {% if not user.is_authenticated %}<a class="auth-marca" href="{% url 'account_login' %}">Moedas <span>do Real</span></a>{% endif %}
+    {% block body %}{% block content %}{% endblock content %}{% endblock body %}
+  </div>
+{% endblock %}

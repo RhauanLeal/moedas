@@ -1,0 +1,11 @@
+services:
+  moedas:
+    build: .
+    container_name: moedas
+    env_file: .env
+    ports:
+      - "${PORTA:-8010}:8000"
+    restart: unless-stopped
+    # Permite acessar serviços do próprio computador/VM via host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

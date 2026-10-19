@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titulo %}Política de privacidade · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <article class="texto-longo">
+    <h1>Política de privacidade</h1>
+    <p><i>Última atualização: outubro de 2026.</i></p>
+
+    <h3>Quais dados guardamos</h3>
+    <ul>
+      <li><b>Conta:</b> seu e-mail e, se você entrar com o Google, nome e identificador da conta Google. Senhas são guardadas apenas de forma criptografada.</li>
+      <li><b>Coleção:</b> as moedas que você marca, quantidades, estado de conservação, datas e observações que você escrever.</li>
+      <li><b>Notificações:</b> se você ativar, o endereço técnico que o navegador fornece para entregar avisos ao seu aparelho.</li>
+    </ul>
+
+    <h3>Para que usamos</h3>
+    <p>Somente para fazer o app funcionar: entrar na sua conta, mostrar a sua coleção e enviar os avisos que você ativou. Não vendemos nem compartilhamos seus dados, e não usamos rastreadores de publicidade.</p>
+
+    <h3>Cookies</h3>
+    <p>Usamos apenas os cookies necessários para manter você conectado e proteger os formulários.</p>
+
+    <h3>Seus direitos (LGPD)</h3>
+    <p>Você pode ver e corrigir seus dados no próprio app e pode <a href="{% url 'excluir_conta' %}">excluir sua conta</a> a qualquer momento — isso apaga a conta e toda a coleção de forma definitiva.</p>
+
+    {% if contato_email %}
+    <h3>Contato</h3>
+    <p>Dúvidas sobre privacidade: <a href="mailto:{{ contato_email }}">{{ contato_email }}</a></p>
+    {% endif %}
+
+    <p><a href="{% if user.is_authenticated %}{% url 'inicio' %}{% else %}{% url 'account_login' %}{% endif %}">‹ Voltar</a></p>
+  </article>
+{% endblock %}

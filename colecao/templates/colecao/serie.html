@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}{{ serie }} · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <a class="voltar" href="{% url 'inicio' %}">‹ Início</a>
+  <h1>{{ serie }}</h1>
+  {% include "colecao/_barra.html" with dados=progresso_serie serie=serie %}
+
+  <div class="filtros">
+    <a href="?" {% if not faltando %}class="ativo"{% endif %}>Todas</a>
+    <a href="?faltando=1" {% if faltando %}class="ativo"{% endif %}>Só as que faltam</a>
+  </div>
+
+  {% include "colecao/_grupos_denominacao.html" %}
+  {% if not grupos %}<p class="vazio">{% if faltando %}Série completa! 🎉{% else %}Nenhuma moeda cadastrada nesta série.{% endif %}</p>{% endif %}
+{% endblock %}

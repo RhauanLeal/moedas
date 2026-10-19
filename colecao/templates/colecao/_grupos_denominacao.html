@@ -1,0 +1,6 @@
+{% for denominacao, moedas in grupos %}
+  <h3>{{ denominacao }}</h3>
+  <div class="chips{% if moedas.0.descricao %} largos{% endif %}">
+    {% for m in moedas %}{% include "colecao/_chip.html" %}{% endfor %}
+  </div>
+{% endfor %}

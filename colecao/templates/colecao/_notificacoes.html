@@ -1,0 +1,7 @@
+<section id="notificacoes" class="cartao"
+         data-vapid="{% if push_ativo %}{{ vapid_public_key }}{% endif %}"
+         data-inscrever="{% url 'push_inscrever' %}" data-cancelar="{% url 'push_cancelar' %}">
+  <h3>Notificações</h3>
+  <p class="vazio" data-estado>Verificando…</p>
+  <button type="button" class="btn" hidden>Ativar notificações</button>
+</section>

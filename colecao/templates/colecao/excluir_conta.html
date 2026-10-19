@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Excluir conta · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <a class="voltar" href="{% url 'conta' %}">‹ Minha conta</a>
+  <h1>Excluir conta</h1>
+  <section class="cartao">
+    <p>Isso apaga <b>definitivamente</b> sua conta, toda a sua coleção (quantidades, estados e observações) e as notificações. Não tem como desfazer.</p>
+    <form method="post">
+      {% csrf_token %}
+      <label for="id_confirmacao" class="rotulo">Para confirmar, digite <b>EXCLUIR</b></label>
+      <input id="id_confirmacao" name="confirmacao" autocomplete="off" autocapitalize="characters" class="campo" required>
+      <div class="acoes">
+        <a class="btn sec" href="{% url 'conta' %}">Cancelar</a>
+        <button class="btn perigo-cheio" type="submit">Excluir para sempre</button>
+      </div>
+    </form>
+  </section>
+{% endblock %}

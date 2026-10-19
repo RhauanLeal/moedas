@@ -1,0 +1,8 @@
+{% if m.qtd %}<button type="button" id="moeda-{{ m.pk }}" class="chip tenho {{ m.metal }}"{% if oob %} hx-swap-oob="true"{% endif %}
+  hx-get="{% url 'ficha' m.pk %}" hx-target="#ficha-conteudo" hx-swap="innerHTML"
+  aria-label="{{ m }} – tenho {{ m.qtd }}, abrir ficha">{% else %}<button type="button" id="moeda-{{ m.pk }}" class="chip"{% if oob %} hx-swap-oob="true"{% endif %}
+  hx-post="{% url 'marcar' m.pk %}" hx-swap="none"
+  aria-label="{{ m }} – não tenho, tocar para marcar">{% endif %}
+  {% if m.descricao %}<span class="marca-ok" aria-hidden="true"></span><span class="ano">{{ m.ano_rotulo }}</span><span class="desc">{{ m.descricao }}</span>{% if m.estado %}<span class="est">{{ m.estado }}</span>{% endif %}{% if m.qtd > 1 %}<span class="qtd">×{{ m.qtd }}</span>{% endif %}
+  {% else %}{{ m.ano_rotulo }}{% if m.estado %}<span class="est">{{ m.estado }}</span>{% endif %}{% if m.qtd > 1 %}<span class="qtd">{{ m.qtd }}</span>{% endif %}{% endif %}
+</button>
