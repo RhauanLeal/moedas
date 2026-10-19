@@ -129,6 +129,7 @@ SOCIALACCOUNT_ADAPTER = "colecao.adapters.ContaSocialAdapter"
 ACCOUNT_LOGIN_METHODS = {"email", "username"}  # e-mail para todos; usuário "rhauan" continua valendo
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_CHANGE_EMAIL = True  # um e-mail por conta: trocar substitui o atual após confirmar o novo
 ACCOUNT_SESSION_REMEMBER = True
 # none = entra direto após cadastrar; mandatory = exige confirmar o e-mail (precisa de SMTP)
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION") or "none"
