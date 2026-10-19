@@ -299,3 +299,14 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .escolha-serie select { width: 100%; min-height: 44px; margin-top: 4px; border-radius: 12px; border: 1.5px solid var(--linha); background: var(--cartao); color: var(--texto); font: inherit; padding: 0 10px; }
 .texto-compartilhar { width: 100%; box-sizing: border-box; border-radius: 12px; border: 1.5px solid var(--linha); background: var(--cartao); color: var(--texto); font: 15px/1.5 inherit; padding: 12px; resize: vertical; }
 .acoes-compartilhar { flex-wrap: wrap; }
+
+/* ---------- coleção pública ---------- */
+.campo-link, .form-nome input { width: 100%; box-sizing: border-box; min-height: 44px; border-radius: 12px; border: 1.5px solid var(--linha); background: var(--fundo); color: var(--texto); font: inherit; padding: 0 10px; }
+.form-nome { display: block; margin: 12px 0; }
+.form-nome .btn { margin-top: 8px; width: 100%; }
+.chip.publico { display: inline-flex; align-items: center; justify-content: center; cursor: default; }
+.chip.publico:active { transform: none; }
+.pub-topo { text-align: center; margin: 8px 0 4px; }
+.pub-topo h1 { margin-bottom: 2px; }
+.serie-resumo { font-size: 14px; color: var(--texto-2); font-weight: 400; }
+.pub-rodape { text-align: center; margin: 28px 0 12px; }

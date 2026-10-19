@@ -8,7 +8,7 @@ from unittest import mock
 
 from django.test import override_settings
 
-from .models import Aviso, InscricaoPush, ItemColecao, Moeda, Serie
+from .models import Aviso, InscricaoPush, ItemColecao, Moeda, PerfilPublico, Serie
 from .views import interpretar_busca
 
 
@@ -251,7 +251,6 @@ class PushTests(TestCase):
         self.assertContains(self.client.get(reverse("novidades")), "Teste de aviso")
         self.assertContains(self.client.get(reverse("conta")), "ana@ex.com")
 
-
 class FotosTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -331,3 +330,57 @@ class CompartilharTests(TestCase):
     def test_exige_login(self):
         self.client.logout()
         self.assertEqual(self.client.get(reverse("compartilhar")).status_code, 302)
+
+
+class ColecaoPublicaTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("carregar_catalogo", verbosity=0)
+        cls.user = User.objects.create_user("rhauan", "segredo@ex.com", "senha-de-teste-123", first_name="Rhauan")
+
+    def ativar(self):
+        self.client.force_login(self.user)
+        self.client.get(reverse("conta"))  # cria o perfil
+        self.client.post(reverse("compartilhar_colecao"), {"acao": "ativar", "nome": "Rhauan"})
+        self.client.logout()
+        return PerfilPublico.objects.get(user=self.user)
+
+    def test_desligado_por_padrao(self):
+        self.client.force_login(self.user)
+        self.client.get(reverse("conta"))
+        perfil = PerfilPublico.objects.get(user=self.user)
+        self.assertFalse(perfil.ativo)
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse("colecao_publica", args=[perfil.token])).status_code, 404)
+
+    def test_pagina_publica_sem_login_e_sem_dados_pessoais(self):
+        ItemColecao.objects.create(
+            user=self.user, moeda=Moeda.objects.first(), quantidade=2, estado="FC", observacao="achei na padaria"
+        )
+        perfil = self.ativar()
+        r = self.client.get(reverse("colecao_publica", args=[perfil.token]))
+        self.assertContains(r, "Coleção de Rhauan")
+        self.assertContains(r, "1</span>")
+        for proibido in ("segredo@ex.com", "achei na padaria", "FC"):
+            self.assertNotContains(r, proibido)
+        self.assertIn("noindex", r["X-Robots-Tag"])
+        self.assertEqual(self.client.get(reverse("colecao_publica", args=[perfil.token]), {"ver": "repetidas"}).status_code, 200)
+
+    def test_novo_link_invalida_o_anterior_e_desativar_fecha(self):
+        perfil = self.ativar()
+        antigo = perfil.token
+        self.client.force_login(self.user)
+        self.client.post(reverse("compartilhar_colecao"), {"acao": "novo_link"})
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse("colecao_publica", args=[antigo])).status_code, 404)
+        perfil.refresh_from_db()
+        self.assertEqual(self.client.get(reverse("colecao_publica", args=[perfil.token])).status_code, 200)
+        self.client.force_login(self.user)
+        self.client.post(reverse("compartilhar_colecao"), {"acao": "desativar"})
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse("colecao_publica", args=[perfil.token])).status_code, 404)
+
+    def test_exige_login_para_configurar(self):
+        r = self.client.post(reverse("compartilhar_colecao"), {"acao": "ativar"})
+        self.assertEqual(r.status_code, 302)
+        self.assertIn(reverse("account_login"), r["Location"])

@@ -12,6 +12,8 @@ urlpatterns = [
     path("moeda/<int:pk>/", views.ficha, name="ficha"),
     # conta e páginas do app
     path("conta/", views_app.conta, name="conta"),
+    path("conta/compartilhar/", views_app.compartilhar_colecao, name="compartilhar_colecao"),
+    path("c/<str:token>/", views_app.colecao_publica, name="colecao_publica"),
     path("conta/excluir/", views_app.excluir_conta, name="excluir_conta"),
     path("novidades/", views_app.novidades, name="novidades"),
     path("privacidade/", views_app.privacidade, name="privacidade"),

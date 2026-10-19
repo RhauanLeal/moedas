@@ -90,6 +90,25 @@
       });
     }
 
+    // ---------- link público da coleção ----------
+    var campoLink = document.getElementById("link-publico");
+    if (campoLink) {
+      var avisoLink = document.querySelector("[data-aviso-copia]");
+      document.querySelector("[data-copiar-link]").addEventListener("click", function () {
+        function ok() { avisoLink.hidden = false; setTimeout(function () { avisoLink.hidden = true; }, 2500); }
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(campoLink.value).then(ok, function () {});
+        } else {
+          campoLink.select();
+          if (document.execCommand("copy")) ok();
+        }
+      });
+      document.querySelector("[data-whatsapp-link]").addEventListener("click", function () {
+        var msg = "Veja minha coleção de moedas do Real: " + campoLink.value;
+        window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank", "noopener");
+      });
+    }
+
     // ---------- PWA ----------
     var logado = body.dataset.logado === "1";
     if ("serviceWorker" in navigator) {

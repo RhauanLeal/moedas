@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titulo %}{{ og_titulo }}{% endblock %}
+{% block extra_head %}
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ og_titulo }}">
+  <meta property="og:description" content="Acompanhe a coleção de moedas do Plano Real.">
+  <meta property="og:image" content="{{ og_imagem }}">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+{% endblock %}
+{% block conteudo %}
+  <div class="pub-topo">
+    <h1>Coleção de {{ perfil.nome_exibido }}</h1>
+    <p class="vazio" style="padding:0">Moedas do Real · somente leitura</p>
+  </div>
+  {% include "colecao/_barra.html" with dados=progresso serie=None %}
+
+  <div class="filtros">
+    <a href="?" {% if ver == "todas" %}class="ativo"{% endif %}>Todas</a>
+    <a href="?ver=faltam" {% if ver == "faltam" %}class="ativo"{% endif %}>Faltam</a>
+    <a href="?ver=repetidas" {% if ver == "repetidas" %}class="ativo"{% endif %}>Repetidas</a>
+  </div>
+
+  {% for g in grupos %}
+    <h2>{{ g.serie }} <span class="serie-resumo">{{ g.resumo.tenho }}/{{ g.resumo.total }}</span></h2>
+    {% for denominacao, moedas in g.por_denominacao %}
+      <h3>{{ denominacao }}</h3>
+      <div class="chips{% if moedas.0.descricao %} largos{% endif %}">
+        {% for m in moedas %}{% include "colecao/_chip_publico.html" %}{% endfor %}
+      </div>
+    {% endfor %}
+  {% empty %}
+    <p class="vazio">{% if ver == "faltam" %}Coleção completa! 🎉{% else %}Nenhuma moeda repetida.{% endif %}</p>
+  {% endfor %}
+
+  <p class="pub-rodape">
+    {% if user.is_authenticated %}<a href="{% url 'inicio' %}">Ir para minha coleção</a>
+    {% else %}<a class="btn largo" href="{% url 'account_signup' %}">Criar minha coleção</a>{% endif %}
+  </p>
+{% endblock %}
