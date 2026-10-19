@@ -9,4 +9,6 @@ def app(request):
         "vapid_public_key": settings.VAPID_PUBLIC_KEY,
         "cadastro_aberto": settings.CADASTRO_ABERTO,
         "contato_email": settings.CONTATO_EMAIL,
+        "pix_chave": settings.PIX_CHAVE,
+        "pix_nome": settings.PIX_NOME,
     }

@@ -90,6 +90,21 @@
       });
     }
 
+    // ---------- copiar chave / código Pix ----------
+    document.querySelectorAll("[data-copiar-texto]").forEach(function (botao) {
+      var campo = document.getElementById(botao.dataset.copiarTexto);
+      var aviso = botao.nextElementSibling;
+      botao.addEventListener("click", function () {
+        function ok() { aviso.hidden = false; setTimeout(function () { aviso.hidden = true; }, 3000); }
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(campo.value).then(ok, function () {});
+        } else {
+          campo.select();
+          if (document.execCommand("copy")) ok();
+        }
+      });
+    });
+
     // ---------- link público da coleção ----------
     var campoLink = document.getElementById("link-publico");
     if (campoLink) {

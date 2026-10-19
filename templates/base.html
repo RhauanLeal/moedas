@@ -25,6 +25,7 @@
       <button type="button" class="instalar" data-instalar hidden>Instalar</button>
       <button type="button" class="btn-editar" data-editar aria-pressed="false">Editar</button>
       <a href="{% url 'faltando' %}" {% if rota == 'faltando' %}class="ativo"{% endif %}>Faltando</a>
+      {% if pix_chave %}<a href="{% url 'apoie' %}" {% if rota == 'apoie' %}class="ativo"{% endif %}>☕ Apoiar</a>{% endif %}
       <a href="{% url 'novidades' %}" class="icone{% if rota == 'novidades' %} ativo{% endif %}" aria-label="Novidades" title="Novidades">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
       </a>
@@ -43,6 +44,10 @@
   {% endif %}
 
   <main>{% block conteudo %}{% endblock %}</main>
+
+  {% if pix_chave and user.is_authenticated and request.resolver_match.url_name != 'apoie' %}
+  <footer class="rodape-apoio"><a href="{% url 'apoie' %}">☕ Gostou do app? Apoie com um Pix</a></footer>
+  {% endif %}
 
   <dialog id="ficha" aria-label="Ficha da moeda">
     <div id="ficha-conteudo"></div>
