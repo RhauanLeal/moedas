@@ -151,6 +151,19 @@ class ContasTests(TestCase):
         r = self.client.post(reverse("account_login"), {"login": "nova@ex.com", "password": "Moeda-forte-2026"})
         self.assertRedirects(r, reverse("inicio"), fetch_redirect_response=False)
 
+    def test_trocar_email_substitui_em_vez_de_acumular(self):
+        from allauth.account.models import EmailAddress
+
+        u = User.objects.create_user("ana", "ana@ex.com", "senha-de-teste-123")
+        EmailAddress.objects.create(user=u, email="ana@ex.com", primary=True, verified=True)
+        self.client.force_login(u)
+        for novo in ("novo1@ex.com", "novo2@ex.com"):
+            self.client.post(reverse("account_email"), {"action_add": "", "email": novo})
+        pendentes = EmailAddress.objects.filter(user=u, verified=False)
+        self.assertEqual(pendentes.count(), 1)
+        self.assertEqual(pendentes.get().email, "novo2@ex.com")
+        self.assertEqual(EmailAddress.objects.filter(user=u).count(), 2)  # atual + 1 pendente
+
     def test_login_por_usuario_antigo(self):
         User.objects.create_user("rhauan", "", "senha-de-teste-123")
         r = self.client.post(reverse("account_login"), {"login": "rhauan", "password": "senha-de-teste-123"})
