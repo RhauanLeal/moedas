@@ -5,6 +5,7 @@ Coleção (o que cada pessoa tem):           ItemColecao (1 por usuário + moeda
 
 Cada "bolinha" do PDF é uma Moeda: série + denominação + ano (+ variante/descrição).
 """
+import secrets
 import unicodedata
 
 from django.conf import settings
@@ -196,3 +197,31 @@ class InscricaoPush(models.Model):
 
     def __str__(self):
         return f"{self.user} – {self.endpoint[:40]}…"
+
+
+# ---------- compartilhamento por link ----------
+
+def novo_token():
+    return secrets.token_urlsafe(16)
+
+
+class PerfilPublico(models.Model):
+    """Link de leitura da coleção de um usuário (desligado até ele ativar)."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="perfil_publico"
+    )
+    ativo = models.BooleanField(default=False)
+    token = models.CharField(max_length=40, unique=True, default=novo_token, editable=False)
+    nome = models.CharField("nome na página pública", max_length=40, blank=True)
+
+    class Meta:
+        verbose_name = "perfil público"
+        verbose_name_plural = "perfis públicos"
+
+    @property
+    def nome_exibido(self):
+        return self.nome or "Colecionador"
+
+    def __str__(self):
+        return f"{self.user} ({'ativo' if self.ativo else 'desligado'})"

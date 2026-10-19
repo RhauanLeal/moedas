@@ -5,29 +5,91 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
 
-from .models import Aviso, InscricaoPush
+from .models import Aviso, InscricaoPush, PerfilPublico, novo_token
+from .views import agrupar_por_serie, moedas_com_colecao, progresso, series_com_progresso
 
-VERSAO_CACHE = "v4"  # aumente quando mudar o service worker para forçar atualização
+VERSAO_CACHE = "v5"  # aumente quando mudar o service worker para forçar atualização
 
 
 # ---------- conta ----------
 
 @login_required
 def conta(request):
+    perfil, _ = PerfilPublico.objects.get_or_create(
+        user=request.user, defaults={"nome": request.user.first_name[:40]}
+    )
     return render(
         request,
         "colecao/conta.html",
         {
+            "perfil": perfil,
+            "link_publico": request.build_absolute_uri(reverse("colecao_publica", args=[perfil.token])),
             "tem_senha": request.user.has_usable_password(),
             "contas_sociais": request.user.socialaccount_set.all(),
         },
     )
+
+
+@login_required
+@require_POST
+def compartilhar_colecao(request):
+    """Liga/desliga o link público da coleção, troca o link ou o nome exibido."""
+    perfil, _ = PerfilPublico.objects.get_or_create(user=request.user)
+    acao = request.POST.get("acao")
+    if acao == "ativar":
+        perfil.nome = request.POST.get("nome", "").strip()[:40] or perfil.nome
+        perfil.ativo = True
+        messages.success(request, "Link ativado. Quem tiver o link poderá ver sua coleção.")
+    elif acao == "desativar":
+        perfil.ativo = False
+        messages.success(request, "Link desativado.")
+    elif acao == "novo_link":
+        perfil.token = novo_token()
+        messages.success(request, "Novo link gerado. O anterior deixou de funcionar.")
+    elif acao == "nome":
+        perfil.nome = request.POST.get("nome", "").strip()[:40]
+        messages.success(request, "Nome atualizado.")
+    perfil.save()
+    return redirect(reverse("conta") + "#compartilhar-colecao")
+
+
+@never_cache
+def colecao_publica(request, token):
+    """Coleção de alguém em modo somente leitura, aberta por link (sem login)."""
+    perfil = get_object_or_404(PerfilPublico.objects.select_related("user"), token=token, ativo=True)
+    ver = request.GET.get("ver")
+    ver = ver if ver in ("faltam", "repetidas") else "todas"
+    moedas = moedas_com_colecao(perfil.user)
+    if ver == "faltam":
+        moedas = moedas.filter(qtd=0)
+    elif ver == "repetidas":
+        moedas = moedas.filter(qtd__gte=2)
+    por_serie = {s.pk: s for s in series_com_progresso(perfil.user)}
+    grupos = agrupar_por_serie(list(moedas))
+    for g in grupos:
+        g["resumo"] = por_serie[g["serie"].pk]
+    dados = progresso(perfil.user)
+    resp = render(
+        request,
+        "colecao/publica.html",
+        {
+            "perfil": perfil,
+            "ver": ver,
+            "grupos": grupos,
+            "progresso": dados,
+            "og_titulo": f"Coleção de moedas do Real de {perfil.nome_exibido} – {dados['tenho']}/{dados['total']}",
+            "og_imagem": request.build_absolute_uri(static("icones/icone-512.png")),
+        },
+    )
+    resp["X-Robots-Tag"] = "noindex, nofollow"
+    resp["Referrer-Policy"] = "no-referrer"
+    return resp
 
 
 @login_required

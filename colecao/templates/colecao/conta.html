@@ -18,6 +18,41 @@
     </div>
   </section>
 
+  <section class="cartao" id="compartilhar-colecao">
+    <h3>Compartilhar minha coleção</h3>
+    {% if perfil.ativo %}
+      <p class="vazio">Quem tiver este link vê o que você tem, o que falta e suas repetidas (sem estado, data ou observações), só para leitura.</p>
+      <input type="text" class="campo-link" id="link-publico" value="{{ link_publico }}" readonly>
+      <div class="acoes acoes-compartilhar">
+        <button type="button" class="btn" data-copiar-link>Copiar link</button>
+        <button type="button" class="btn sec" data-whatsapp-link>WhatsApp</button>
+        <a class="btn sec" href="{% url 'colecao_publica' perfil.token %}" target="_blank" rel="noopener">Ver</a>
+      </div>
+      <p class="vazio" data-aviso-copia hidden>Copiado! ✓</p>
+      <form method="post" action="{% url 'compartilhar_colecao' %}" class="form-nome">
+        {% csrf_token %}
+        <label>Nome na página pública
+          <input type="text" name="nome" value="{{ perfil.nome }}" maxlength="40" placeholder="Ex.: Rhauan">
+        </label>
+        <button class="btn sec" name="acao" value="nome">Salvar nome</button>
+      </form>
+      <form method="post" action="{% url 'compartilhar_colecao' %}" class="acoes">
+        {% csrf_token %}
+        <button class="btn sec" name="acao" value="novo_link" onclick="return confirm('O link atual deixará de funcionar. Continuar?')">Gerar novo link</button>
+        <button class="btn perigo" name="acao" value="desativar">Desativar</button>
+      </form>
+    {% else %}
+      <p class="vazio">Gere um link para mostrar sua coleção a amigos. É só leitura e você pode desativar quando quiser.</p>
+      <form method="post" action="{% url 'compartilhar_colecao' %}">
+        {% csrf_token %}
+        <label class="form-nome">Nome que aparecerá na página
+          <input type="text" name="nome" value="{{ perfil.nome }}" maxlength="40" placeholder="Ex.: Rhauan">
+        </label>
+        <button class="btn largo" name="acao" value="ativar">Ativar link</button>
+      </form>
+    {% endif %}
+  </section>
+
   {% include "colecao/_notificacoes.html" %}
 
   <section class="cartao">
