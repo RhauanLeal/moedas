@@ -250,3 +250,50 @@ class PushTests(TestCase):
         Aviso.objects.create(titulo="Teste de aviso", texto="texto")
         self.assertContains(self.client.get(reverse("novidades")), "Teste de aviso")
         self.assertContains(self.client.get(reverse("conta")), "ana@ex.com")
+
+
+class FotosTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("carregar_catalogo", verbosity=0)
+        call_command("carregar_fotos", verbosity=0)
+        cls.user = User.objects.create_user("rhauan", password="senha-de-teste-123")
+
+    def test_todas_as_moedas_tem_foto_e_arquivo(self):
+        from pathlib import Path
+
+        from django.conf import settings
+
+        self.assertFalse(Moeda.objects.filter(foto_cara="").exists())
+        self.assertFalse(Moeda.objects.filter(foto_coroa="").exists())
+        for caminho in set(Moeda.objects.values_list("foto_cara", flat=True)) | set(
+            Moeda.objects.values_list("foto_coroa", flat=True)
+        ):
+            self.assertTrue((Path(settings.BASE_DIR) / "static" / caminho).exists(), caminho)
+
+    def test_2019a_tem_dica(self):
+        m = Moeda.objects.get(serie__nome="2ª Família", denominacao__valor_centavos=5, ano=2019, variante="A")
+        self.assertIn("“A”", m.como_identificar)
+        comum = Moeda.objects.get(serie__nome="2ª Família", denominacao__valor_centavos=5, ano=2019, variante="")
+        self.assertEqual(comum.como_identificar, "")
+        self.assertNotEqual(m.foto_coroa, comum.foto_coroa)
+
+    def test_idempotente_e_nao_mexe_na_colecao(self):
+        m = Moeda.objects.get(serie__nome="2ª Família", denominacao__valor_centavos=50, ano=2008)
+        ItemColecao.objects.create(user=self.user, moeda=m, quantidade=2, estado="SOB", observacao="minha")
+        Moeda.objects.filter(pk=m.pk).update(foto_cara="moedas/ajustada.webp")
+        call_command("carregar_fotos", verbosity=0)
+        m.refresh_from_db()
+        self.assertEqual(m.foto_cara, "moedas/ajustada.webp")  # ajuste manual preservado
+        call_command("carregar_fotos", "--forcar", verbosity=0)
+        m.refresh_from_db()
+        self.assertEqual(m.foto_cara, "moedas/f2-50-cara.webp")
+        item = ItemColecao.objects.get(user=self.user, moeda=m)
+        self.assertEqual((item.quantidade, item.estado, item.observacao), (2, "SOB", "minha"))
+
+    def test_ficha_mostra_fotos(self):
+        self.client.force_login(self.user)
+        m = Moeda.objects.get(serie__nome="2ª Família", denominacao__valor_centavos=5, ano=2019, variante="A")
+        r = self.client.get(reverse("ficha", args=[m.pk]))
+        self.assertContains(r, "f2-5A-coroa.webp")
+        self.assertContains(r, "Como identificar")
