@@ -192,6 +192,55 @@ def buscar(request):
     )
 
 
+# ---------- compartilhar ----------
+
+def texto_compartilhar(user, tipo, serie=None):
+    """Mensagem pronta para WhatsApp: moedas que faltam ou repetidas para troca, por série."""
+    moedas = moedas_com_colecao(user)
+    if serie is not None:
+        moedas = moedas.filter(serie=serie)
+    repetidas = tipo == "repetidas"
+    moedas = list(moedas.filter(qtd__gte=2) if repetidas else moedas.filter(qtd=0))
+    if not moedas:
+        return ""
+
+    def rotulo(m):
+        txt = m.ano_rotulo + (f" ({m.descricao})" if m.descricao else "")
+        return f"{txt} +{m.qtd - 1}" if repetidas else txt
+
+    onde = f" da série {serie.nome}" if serie else ""
+    if repetidas:
+        linhas = [f"🪙 Moedas do Real repetidas{onde} (tenho para troca):"]
+    else:
+        total = Moeda.objects.filter(serie=serie).count() if serie else Moeda.objects.count()
+        linhas = [f"🪙 Moedas do Real que me faltam{onde} ({len(moedas)} de {total}):"]
+
+    for g in agrupar_por_serie(moedas):
+        linhas += ["", f"*{g['serie'].nome}*"]
+        for denom, ms in g["por_denominacao"]:
+            linhas.append(f"• {denom.nome}: " + ", ".join(rotulo(m) for m in ms))
+    linhas += ["", "Alguma dessas te interessa? 🙂" if repetidas else "Você tem alguma para trocar? 🙂"]
+    return "\n".join(linhas)
+
+
+@login_required
+def compartilhar(request):
+    tipo = "repetidas" if request.GET.get("tipo") == "repetidas" else "faltam"
+    serie = None
+    if request.GET.get("serie", "").isdigit():
+        serie = get_object_or_404(Serie, pk=int(request.GET["serie"]))
+    return render(
+        request,
+        "colecao/compartilhar.html",
+        {
+            "tipo": tipo,
+            "serie": serie,
+            "texto": texto_compartilhar(request.user, tipo, serie),
+            "series": Serie.objects.all(),
+        },
+    )
+
+
 # ---------- ações (HTMX) ----------
 
 def resposta_moeda(request, moeda_id, extra_headers=None):

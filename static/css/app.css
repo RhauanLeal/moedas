@@ -292,3 +292,10 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 @media (prefers-color-scheme: dark) { .btn.perigo-cheio { color: #fff; } }
 .cartao .vazio { padding: 0; margin: 0 0 10px; }
 .cartao .vazio:last-child { margin-bottom: 0; }
+
+/* ---------- compartilhar ---------- */
+.compartilhar-link { display: inline-block; margin: 10px 0 4px; color: var(--destaque); font-size: 14px; text-decoration: none; }
+.escolha-serie { margin: 12px 0; }
+.escolha-serie select { width: 100%; min-height: 44px; margin-top: 4px; border-radius: 12px; border: 1.5px solid var(--linha); background: var(--cartao); color: var(--texto); font: inherit; padding: 0 10px; }
+.texto-compartilhar { width: 100%; box-sizing: border-box; border-radius: 12px; border: 1.5px solid var(--linha); background: var(--cartao); color: var(--texto); font: 15px/1.5 inherit; padding: 12px; resize: vertical; }
+.acoes-compartilhar { flex-wrap: wrap; }

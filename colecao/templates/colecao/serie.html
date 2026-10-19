@@ -9,6 +9,7 @@
     <a href="?" {% if not faltando %}class="ativo"{% endif %}>Todas</a>
     <a href="?faltando=1" {% if faltando %}class="ativo"{% endif %}>Só as que faltam</a>
   </div>
+  <a class="compartilhar-link" href="{% url 'compartilhar' %}?serie={{ serie.pk }}">📤 Compartilhar com amigos</a>
 
   {% include "colecao/_grupos_denominacao.html" %}
   {% if not grupos %}<p class="vazio">{% if faltando %}Série completa! 🎉{% else %}Nenhuma moeda cadastrada nesta série.{% endif %}</p>{% endif %}

@@ -65,6 +65,31 @@
       setTimeout(function () { el.remove(); }, 4200);
     });
 
+    // ---------- compartilhar ----------
+    var campoTexto = document.getElementById("texto-compartilhar");
+    if (campoTexto) {
+      var aviso = document.querySelector("[data-aviso-copia]");
+      var nativo = document.querySelector("[data-compartilhar-nativo]");
+      document.querySelector("[data-whatsapp]").addEventListener("click", function () {
+        window.open("https://wa.me/?text=" + encodeURIComponent(campoTexto.value), "_blank", "noopener");
+      });
+      if (navigator.share) {
+        nativo.hidden = false;
+        nativo.addEventListener("click", function () {
+          navigator.share({ text: campoTexto.value }).catch(function () {});
+        });
+      }
+      document.querySelector("[data-copiar]").addEventListener("click", function () {
+        function ok() { aviso.hidden = false; setTimeout(function () { aviso.hidden = true; }, 2500); }
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(campoTexto.value).then(ok, function () {});
+        } else {
+          campoTexto.select();
+          if (document.execCommand("copy")) ok();
+        }
+      });
+    }
+
     // ---------- PWA ----------
     var logado = body.dataset.logado === "1";
     if ("serviceWorker" in navigator) {
