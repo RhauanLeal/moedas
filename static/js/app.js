@@ -31,6 +31,26 @@
       dlg.addEventListener("close", function () { conteudo.innerHTML = ""; });
     }
 
+    // ---------- modo edição ----------
+    // Ao abrir, a coleção é só para visualizar; toques nas moedas só valem com a edição ligada.
+    var btnEditar = document.querySelector("[data-editar]");
+    function definirEdicao(ligada) {
+      body.classList.toggle("editando", ligada);
+      if (btnEditar) {
+        btnEditar.textContent = ligada ? "Concluir" : "Editar";
+        btnEditar.setAttribute("aria-pressed", ligada ? "true" : "false");
+      }
+    }
+    if (btnEditar) btnEditar.addEventListener("click", function () {
+      definirEdicao(!body.classList.contains("editando"));
+    });
+    // Fase de captura: barra o clique antes de o HTMX marcar a moeda ou abrir a ficha
+    document.addEventListener("click", function (e) {
+      if (body.classList.contains("editando")) return;
+      var chip = e.target.closest(".chip");
+      if (chip) { e.preventDefault(); e.stopImmediatePropagation(); }
+    }, true);
+
     // Botões − / + da quantidade
     body.addEventListener("click", function (e) {
       var b = e.target.closest("[data-delta]");

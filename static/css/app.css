@@ -58,6 +58,11 @@ a { color: var(--destaque); }
 .topo .marca span { color: var(--destaque); }
 .topo nav { margin-left: auto; display: flex; gap: 14px; font-size: 15px; }
 .topo nav a, .topo nav button { color: var(--texto-2); text-decoration: none; background: none; border: 0; font: inherit; padding: 0; cursor: pointer; }
+.topo nav .btn-editar { border: 1.5px solid var(--linha); border-radius: 99px; padding: 3px 12px; }
+body.editando .topo nav .btn-editar { background: var(--destaque); border-color: var(--destaque); color: #fff; font-weight: 600; }
+@media (prefers-color-scheme: dark) { body.editando .topo nav .btn-editar { color: #1a140c; } }
+body:not(.editando) .chip { cursor: default; }
+body:not(.editando) .chip:active { transform: none; }
 .topo nav a.ativo { color: var(--destaque); font-weight: 600; }
 
 main { max-width: 720px; margin: 0 auto; padding: 16px; }

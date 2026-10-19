@@ -5,7 +5,7 @@
   <div class="busca">
     <input type="search" name="q" placeholder="Achei uma moeda… ex.: 50 2008" autocomplete="off"
            hx-get="{% url 'buscar' %}" hx-trigger="input changed delay:250ms, search" hx-target="#resultados">
-    <small>Digite valor e/ou ano (<b>50 2008</b>, <b>1 real 2019</b>, <b>5c 2019a</b>) ou tema (<b>natação</b>, <b>banco central</b>). Toque na moeda para marcar.</small>
+    <small>Digite valor e/ou ano (<b>50 2008</b>, <b>1 real 2019</b>, <b>5c 2019a</b>) ou tema (<b>natação</b>, <b>banco central</b>). Para marcar moedas, toque em <b>Editar</b> no topo.</small>
   </div>
   <div id="resultados"></div>
 

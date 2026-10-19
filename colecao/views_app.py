@@ -13,7 +13,7 @@ from django.views.decorators.http import require_POST
 
 from .models import Aviso, InscricaoPush
 
-VERSAO_CACHE = "v1"  # aumente quando mudar o service worker para forçar atualização
+VERSAO_CACHE = "v2"  # aumente quando mudar o service worker para forçar atualização
 
 
 # ---------- conta ----------
