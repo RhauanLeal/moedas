@@ -251,6 +251,25 @@ class PushTests(TestCase):
         self.assertContains(self.client.get(reverse("novidades")), "Teste de aviso")
         self.assertContains(self.client.get(reverse("conta")), "ana@ex.com")
 
+    def test_apoie_pix(self):
+        self.assertNotContains(self.client.get(reverse("conta")), "Apoie o projeto")
+        self.assertEqual(self.client.get(reverse("apoie")).status_code, 404)
+        with override_settings(PIX_CHAVE="chave-pix-teste", PIX_NOME="Fulano", PIX_CIDADE="Sao Paulo"):
+            self.assertContains(self.client.get(reverse("conta")), "Apoie o projeto")
+            self.assertContains(self.client.get(reverse("inicio")), "Apoie com um Pix")
+            resp = self.client.get(reverse("apoie"))
+        self.assertContains(resp, "<svg")
+        self.assertContains(resp, "br.gov.bcb.pix0115chave-pix-teste")
+        self.assertContains(resp, "FULANO")
+
+    def test_crc_do_pix(self):
+        from .pix import _crc16, payload_pix
+
+        self.assertEqual(_crc16("123456789"), "29B1")
+        codigo = payload_pix("a@b.com", "Fulano", "Sao Paulo")
+        self.assertEqual(codigo[-4:], _crc16(codigo[:-4]))
+
+
 class FotosTests(TestCase):
     @classmethod
     def setUpTestData(cls):

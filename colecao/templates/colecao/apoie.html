@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Apoie o projeto · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <h1>☕ Apoie o projeto</h1>
+
+  <section class="cartao" style="text-align:center">
+    <p class="vazio" style="padding:0 0 12px;text-align:left">O app é gratuito e feito com carinho. Se ele te ajuda a organizar a coleção e você quiser contribuir, qualquer valor via Pix é bem-vindo. Obrigado!</p>
+
+    <div class="pix-qr" role="img" aria-label="QR Code do Pix">{{ pix_qr|safe }}</div>
+    <p class="vazio" style="padding:0 0 12px;font-size:14px">No celular: abra o app do seu banco › Pix › <b>Ler QR Code</b>. No computador, aponte a câmera do celular para o código.</p>
+
+    <textarea id="pix-codigo" class="pix-chave pix-codigo" readonly aria-label="Pix copia e cola">{{ pix_codigo }}</textarea>
+    <button type="button" class="btn largo" data-copiar-texto="pix-codigo" style="margin-top:10px">Copiar Pix (copia e cola)</button>
+    <p class="vazio" hidden style="padding:8px 0 0;color:var(--ok)">Copiado! No app do banco, escolha Pix › Pix Copia e Cola.</p>
+  </section>
+
+  <section class="cartao">
+    <h3>Prefere digitar a chave?</h3>
+    <input type="text" id="pix-chave" class="pix-chave" value="{{ pix_chave }}" readonly aria-label="Chave Pix">
+    {% if pix_nome %}<p class="vazio" style="padding:4px 0 0;font-size:14px">Recebedor: {{ pix_nome }}</p>{% endif %}
+    <button type="button" class="btn sec largo" data-copiar-texto="pix-chave" style="margin-top:10px">Copiar chave Pix</button>
+    <p class="vazio" hidden style="padding:8px 0 0;color:var(--ok)">Chave copiada! Cole no app do seu banco.</p>
+  </section>
+
+  <p class="auth-rodape"><a href="{% if user.is_authenticated %}{% url 'inicio' %}{% else %}{% url 'account_login' %}{% endif %}">‹ Voltar</a></p>
+{% endblock %}

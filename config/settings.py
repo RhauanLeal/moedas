@@ -195,6 +195,11 @@ VAPID_EMAIL = os.environ.get("VAPID_EMAIL", "")
 # Contato exibido na política de privacidade
 CONTATO_EMAIL = os.environ.get("CONTATO_EMAIL", "")
 
+# Doação por Pix (tela "Minha conta"). Vazio = o cartão de apoio não aparece.
+PIX_CHAVE = os.environ.get("PIX_CHAVE", "").strip()
+PIX_NOME = os.environ.get("PIX_NOME", "").strip()  # nome do recebedor (aparece no app do banco)
+PIX_CIDADE = os.environ.get("PIX_CIDADE", "").strip()  # cidade do recebedor (exigida pelo código Pix)
+
 # Login fica salvo no celular por 90 dias.
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 90
 

@@ -11,7 +11,11 @@ from django.urls import reverse
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
 
+from django.conf import settings
+from django.http import Http404
+
 from .models import Aviso, InscricaoPush, PerfilPublico, novo_token
+from .pix import payload_pix, qr_svg
 from .views import agrupar_por_serie, moedas_com_colecao, progresso, series_com_progresso
 
 VERSAO_CACHE = "v5"  # aumente quando mudar o service worker para forçar atualização
@@ -109,6 +113,13 @@ def excluir_conta(request):
 
 def privacidade(request):
     return render(request, "colecao/privacidade.html")
+
+
+def apoie(request):
+    if not settings.PIX_CHAVE:
+        raise Http404
+    codigo = payload_pix(settings.PIX_CHAVE, settings.PIX_NOME, settings.PIX_CIDADE)
+    return render(request, "colecao/apoie.html", {"pix_codigo": codigo, "pix_qr": qr_svg(codigo)})
 
 
 # ---------- novidades ----------

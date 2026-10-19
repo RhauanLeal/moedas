@@ -16,6 +16,7 @@ urlpatterns = [
     path("c/<str:token>/", views_app.colecao_publica, name="colecao_publica"),
     path("conta/excluir/", views_app.excluir_conta, name="excluir_conta"),
     path("novidades/", views_app.novidades, name="novidades"),
+    path("apoie/", views_app.apoie, name="apoie"),
     path("privacidade/", views_app.privacidade, name="privacidade"),
     # PWA
     path("manifest.webmanifest", views_app.manifest, name="manifest"),

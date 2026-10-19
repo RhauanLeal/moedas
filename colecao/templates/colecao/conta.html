@@ -63,6 +63,14 @@
     <p class="vazio" style="padding:8px 0 0;font-size:14px">No Android, se o botão não aparecer: menu ⋮ do Chrome › <b>Instalar app</b> (ou "Adicionar à tela inicial").</p>
   </section>
 
+  {% if pix_chave %}
+  <section class="cartao">
+    <h3>☕ Apoie o projeto</h3>
+    <p class="vazio" style="padding:0 0 10px">O app é gratuito. Se ele te ajuda, você pode contribuir com qualquer valor via Pix.</p>
+    <a class="btn largo" href="{% url 'apoie' %}">Apoiar com Pix</a>
+  </section>
+  {% endif %}
+
   <form method="post" action="{% url 'account_logout' %}">
     {% csrf_token %}
     <button class="btn sec largo" type="submit">Sair</button>
