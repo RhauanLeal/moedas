@@ -1,0 +1,13 @@
+# Só para o homelab: liga o app à rede Docker do container do Postgres.
+# Ative no .env do homelab com:  COMPOSE_FILE=docker-compose.yml:docker-compose.homelab.yml
+# e defina REDE_BANCO=<rede do Postgres>, DB_HOST=<nome do container>, DB_PORT=5432.
+services:
+  moedas:
+    networks:
+      - default
+      - banco
+
+networks:
+  banco:
+    external: true
+    name: ${REDE_BANCO:?defina REDE_BANCO no .env}

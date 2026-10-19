@@ -7,15 +7,6 @@ services:
       - "127.0.0.1:${PORTA:-8030}:8000"
     restart: unless-stopped
     # Permite acessar serviços do próprio computador/VM via host.docker.internal
+    # (em dev, o banco é alcançado pelo túnel SSH: DB_HOST=host.docker.internal, DB_PORT=<porta do túnel>)
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - default
-      - banco
-
-# Rede Docker do container do Postgres (definida no .env). O app acessa o banco
-# pelo nome do container: DB_HOST=<nome do container>, DB_PORT=5432
-networks:
-  banco:
-    external: true
-    name: ${REDE_BANCO:?defina REDE_BANCO no .env}
