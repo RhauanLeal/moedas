@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Compartilhar · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <a class="voltar" href="{% if serie %}{% url 'serie' serie.pk %}{% else %}{% url 'faltando' %}{% endif %}">‹ Voltar</a>
+  <h1>Compartilhar</h1>
+
+  <div class="filtros">
+    <a href="?tipo=faltam{% if serie %}&serie={{ serie.pk }}{% endif %}" {% if tipo == "faltam" %}class="ativo"{% endif %}>O que falta</a>
+    <a href="?tipo=repetidas{% if serie %}&serie={{ serie.pk }}{% endif %}" {% if tipo == "repetidas" %}class="ativo"{% endif %}>Repetidas</a>
+  </div>
+
+  <form method="get" class="escolha-serie">
+    <input type="hidden" name="tipo" value="{{ tipo }}">
+    <label>Série
+      <select name="serie" onchange="this.form.submit()">
+        <option value="">Todas as séries</option>
+        {% for s in series %}<option value="{{ s.pk }}" {% if serie and serie.pk == s.pk %}selected{% endif %}>{{ s.nome }}</option>{% endfor %}
+      </select>
+    </label>
+  </form>
+
+  {% if texto %}
+    <textarea id="texto-compartilhar" class="texto-compartilhar" rows="14" readonly>{{ texto }}</textarea>
+    <div class="acoes acoes-compartilhar">
+      <button type="button" class="btn" data-whatsapp>WhatsApp</button>
+      <button type="button" class="btn sec" data-compartilhar-nativo hidden>Outros apps</button>
+      <button type="button" class="btn sec" data-copiar>Copiar</button>
+    </div>
+    <p class="vazio" data-aviso-copia hidden>Copiado! ✓</p>
+  {% else %}
+    <p class="vazio">
+      {% if tipo == "repetidas" %}Nenhuma moeda repetida{% else %}Nada faltando{% endif %}{% if serie %} nesta série{% endif %}.
+      {% if tipo == "faltam" %}🎉{% endif %}
+    </p>
+  {% endif %}
+{% endblock %}

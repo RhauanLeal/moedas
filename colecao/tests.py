@@ -297,3 +297,37 @@ class FotosTests(TestCase):
         r = self.client.get(reverse("ficha", args=[m.pk]))
         self.assertContains(r, "f2-5A-coroa.webp")
         self.assertContains(r, "Como identificar")
+
+
+class CompartilharTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("carregar_catalogo", verbosity=0)
+        cls.user = User.objects.create_user("rhauan", password="senha-de-teste-123")
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def test_faltam_ignora_as_que_tenho(self):
+        ItemColecao.objects.create(user=self.user, moeda=Moeda.objects.first(), quantidade=1)
+        r = self.client.get(reverse("compartilhar"))
+        self.assertContains(r, "(192 de 193)")
+        self.assertContains(r, "data-whatsapp")
+
+    def test_por_serie(self):
+        serie = Serie.objects.get(nome="2ª Família")
+        r = self.client.get(reverse("compartilhar"), {"serie": serie.pk})
+        self.assertContains(r, "da série 2ª Família")
+        self.assertNotContains(r, "*Olimp")
+
+    def test_repetidas(self):
+        moeda = Moeda.objects.first()
+        r = self.client.get(reverse("compartilhar"), {"tipo": "repetidas"})
+        self.assertContains(r, "Nenhuma moeda repetida")
+        ItemColecao.objects.create(user=self.user, moeda=moeda, quantidade=3)
+        r = self.client.get(reverse("compartilhar"), {"tipo": "repetidas"})
+        self.assertContains(r, f"{moeda.ano_rotulo} +2")
+
+    def test_exige_login(self):
+        self.client.logout()
+        self.assertEqual(self.client.get(reverse("compartilhar")).status_code, 302)
