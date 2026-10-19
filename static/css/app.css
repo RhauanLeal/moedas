@@ -170,6 +170,12 @@ dialog#ficha::backdrop { background: rgba(0,0,0,.45); }
 .ficha .alca { width: 40px; height: 4px; border-radius: 99px; background: var(--linha); margin: -6px auto 12px; }
 .ficha .titulo { font-size: 20px; font-weight: 800; margin: 0; }
 .ficha .sub { color: var(--texto-2); margin: 2px 0 14px; }
+.ficha .fotos { display: flex; gap: 10px; justify-content: center; margin: 0 0 10px; }
+.ficha .fotos figure { margin: 0; text-align: center; flex: 0 1 160px; min-width: 0; }
+.ficha .fotos img { width: 100%; height: auto; aspect-ratio: 1; object-fit: contain; border-radius: 14px; background: #ececec; display: block; }
+.ficha .fotos figcaption { font-size: 12px; font-weight: 600; color: var(--texto-2); margin-top: 4px; }
+.ficha .dica { font-size: 14px; background: color-mix(in srgb, var(--texto-2) 12%, transparent); border-radius: 10px; padding: 8px 10px; margin: 6px 0; }
+.ficha .credito { font-size: 11px; color: var(--texto-2); margin: 4px 0 0; }
 .ficha label { display: block; font-size: 13px; font-weight: 600; color: var(--texto-2); margin: 12px 0 6px; }
 .ficha select, .ficha input, .ficha textarea {
   width: 100%; font: inherit; font-size: 16px; padding: 11px 12px; border-radius: 12px;

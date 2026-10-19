@@ -1,0 +1,362 @@
+{
+ "f1-1": {
+  "cara": "moedas/f1-1-cara.webp",
+  "coroa": "moedas/f1-1-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Centavo_1997_-_R_ckseite_alt_.jpg",
+   "1_Centavo_1997_-_Vorderseite_alt_.jpg"
+  ]
+ },
+ "f1-5": {
+  "cara": "moedas/f1-5-cara.webp",
+  "coroa": "moedas/f1-5-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (CC BY-SA 4.0)",
+  "origem": [
+   "5_Centavos_1994_-_R_ckseite_alt_.jpg",
+   "5_Centavos_1994_-_Vorderseite_alt_.jpg"
+  ]
+ },
+ "f1-10": {
+  "cara": "moedas/f1-10-cara.webp",
+  "coroa": "moedas/f1-10-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (CC BY-SA 4.0)",
+  "origem": [
+   "10_Centavos_1995_-_R_ckseite_alt_.jpg",
+   "10_Centavos_1995_-_Vorderseite_alt_.jpg"
+  ]
+ },
+ "f1-25": {
+  "cara": "moedas/f1-25-cara.webp",
+  "coroa": "moedas/f1-25-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (CC BY-SA 4.0)",
+  "origem": [
+   "25_Centavos_1994_-_R_ckseite_alt_.jpg",
+   "25_Centavos_1994_-_Vorderseite_alt_.jpg"
+  ]
+ },
+ "f1-50": {
+  "cara": "moedas/f1-50-cara.webp",
+  "coroa": "moedas/f1-50-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (CC BY-SA 4.0)",
+  "origem": [
+   "50_Centavos_1994_-_R_ckseite_alt_.jpg",
+   "50_Centavos_1994_-_Vorderseite_alt_.jpg"
+  ]
+ },
+ "f1-100": {
+  "cara": "moedas/f1-100-cara.webp",
+  "coroa": "moedas/f1-100-coroa.webp",
+  "credito": "Wikimedia Commons — MisterSanderson (CC BY-SA 2.5)",
+  "origem": [
+   "Moeda_de_1_real_da_1_gera_o_verso_.png",
+   "Moeda_de_1_Real_da_primeira_gera_o.png"
+  ]
+ },
+ "f2-1": {
+  "cara": "moedas/f2-1-cara.webp",
+  "coroa": "moedas/f2-1-coroa.webp",
+  "credito": "Wikimedia Commons — Anderson Batista Evangelista Lima (MisterSanderson (CC BY-SA 2.5)",
+  "origem": [
+   "Moeda_de_1_centavo_da_2_gera_o_verso_.jpg",
+   "Moeda_de_1_centavo_da_2_gera_o.jpg"
+  ]
+ },
+ "f2-5": {
+  "cara": "moedas/f2-5-cara.webp",
+  "coroa": "moedas/f2-5-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (Public domain)",
+  "origem": [
+   "5_Centavos_2022_-_R_ckseite.jpg",
+   "5_Centavos_2022_-_Vorderseite.jpg"
+  ]
+ },
+ "f2-10": {
+  "cara": "moedas/f2-10-cara.webp",
+  "coroa": "moedas/f2-10-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (Public domain)",
+  "origem": [
+   "10_Centavos_2018_-_R_ckseite.jpg",
+   "10_Centavos_2018_-_Vorderseite.jpg"
+  ]
+ },
+ "f2-25": {
+  "cara": "moedas/f2-25-cara.webp",
+  "coroa": "moedas/f2-25-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (Public domain)",
+  "origem": [
+   "25_Centavos_2021_-_R_ckseite.jpg",
+   "25_Centavos_2021_-_Vorderseite.jpg"
+  ]
+ },
+ "f2-50": {
+  "cara": "moedas/f2-50-cara.webp",
+  "coroa": "moedas/f2-50-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (Public domain)",
+  "origem": [
+   "50_Centavos_2018_-_R_ckseite.jpg",
+   "50_Centavos_2018_-_Vorderseite.jpg"
+  ]
+ },
+ "f2-100": {
+  "cara": "moedas/f2-100-cara.webp",
+  "coroa": "moedas/f2-100-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_2017_-_R_ckseite.jpg",
+   "1_Real_2017_-_Vorderseite.jpg"
+  ]
+ },
+ "f2-5A": {
+  "cara": "moedas/f2-5A-cara.webp",
+  "coroa": "moedas/f2-5A-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (Public domain); Design: Central Bank of Brazil (Public domain)",
+  "origem": [
+   "5_Centavos_2022_-_R_ckseite.jpg",
+   "5-centavos-2019-A.png"
+  ]
+ },
+ "f2-50A": {
+  "cara": "moedas/f2-50A-cara.webp",
+  "coroa": "moedas/f2-50A-coroa.webp",
+  "credito": "Wikimedia Commons — Cerdded41 (Public domain); Design: Central Bank of Brazil (Public domain)",
+  "origem": [
+   "50_Centavos_2018_-_R_ckseite.jpg",
+   "50-centavos-2019-A.png"
+  ]
+ },
+ "com-fao10": {
+  "cara": "moedas/com-fao10-cara.webp",
+  "coroa": "moedas/com-fao10-coroa.webp",
+  "credito": "Wikimedia Commons — Phamat123 (CC BY-SA 4.0)",
+  "origem": [
+   "10_centavos_fao_cropped_.png",
+   "10_centavos_fao.png"
+  ]
+ },
+ "com-fao25": {
+  "cara": "moedas/com-fao25-cara.webp",
+  "coroa": "moedas/com-fao25-coroa.webp",
+  "credito": "Wikimedia Commons — Phamat123 (CC BY-SA 4.0)",
+  "origem": [
+   "25_centavos_fao_cropped_.png",
+   "25_centavos_fao.png"
+  ]
+ },
+ "com-dh1998": {
+  "cara": "moedas/com-dh1998-cara.webp",
+  "coroa": "moedas/com-dh1998-coroa.webp",
+  "credito": "Wikimedia Commons — Photograph: User:Avelludo. Design: Central Bank of (Public domain); Scan: User:Avelludo. Design: Central Bank of Brazi (Public domain)",
+  "origem": [
+   "1-real-1998-direitos-humanos-anverso-2.png",
+   "1-real-1998-direitos-humanos-reverso.png"
+  ]
+ },
+ "com-jk2002": {
+  "cara": "moedas/com-jk2002-cara.webp",
+  "coroa": "moedas/com-jk2002-coroa.webp",
+  "credito": "Wikimedia Commons — MisterSanderson (CC BY-SA 2.5); Phamat123 (CC BY-SA 4.0)",
+  "origem": [
+   "Moeda_de_1_Real_-_Comemorativa_do_centen_rio_de_Juscelino_kubitschek.png",
+   "1_real_Juscelino_Kubitschek.png"
+  ]
+ },
+ "com-bc2005": {
+  "cara": "moedas/com-bc2005-cara.webp",
+  "coroa": "moedas/com-bc2005-coroa.webp",
+  "credito": "Wikimedia Commons — MisterSanderson (CC BY-SA 2.5); Awmcphee (CC0)",
+  "origem": [
+   "Moeda_de_1_Real_-_Comemorativa_de_40_anos_do_Banco_Central.png",
+   "Brazil_R_01_2005_central_bank.jpg"
+  ]
+ },
+ "com-bc2015": {
+  "cara": "moedas/com-bc2015-cara.webp",
+  "coroa": "moedas/com-bc2015-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_50_Years_of_Central_Bank_cropped_.png",
+   "1_Real_50_Years_of_Central_Bank_.png"
+  ]
+ },
+ "com-25anos": {
+  "cara": "moedas/com-25anos-cara.webp",
+  "coroa": "moedas/com-25anos-coroa.webp",
+  "credito": "Wikimedia Commons — Photograph: User:Avelludo. Design: Central Bank of (Public domain)",
+  "origem": [
+   "1-real-2019-25-anos-anverso.png",
+   "1-real-2019-25-anos-reverso.png"
+  ]
+ },
+ "com-30anos": {
+  "cara": "moedas/com-30anos-cara.webp",
+  "coroa": "moedas/com-30anos-coroa.webp",
+  "credito": "Wikimedia Commons — Photograph: User:Avelludo. Design: Central Bank of (Public domain)",
+  "origem": [
+   "1-real-2024-30-anos-anverso.png",
+   "1-real-2024-30-anos-reverso.png"
+  ]
+ },
+ "com-60anos": {
+  "cara": "moedas/com-60anos-cara.webp",
+  "coroa": "moedas/com-60anos-coroa.webp",
+  "credito": "Wikimedia Commons — Photograph: User:Avelludo. Design: Central Bank of (Public domain)",
+  "origem": [
+   "1-real-2025-60-anos-bcb-anverso.png",
+   "1-real-2025-60-anos-bcb-reverso.png"
+  ]
+ },
+ "oli-entrega-da-bandeira": {
+  "cara": "moedas/oli-entrega-da-bandeira-cara.webp",
+  "coroa": "moedas/oli-entrega-da-bandeira-coroa.webp",
+  "credito": "Wikimedia Commons — Phamat123 (CC BY-SA 4.0)",
+  "origem": [
+   "1_real_Flag_Handover_cropped_.png",
+   "1_real_Flag_Handover.png"
+  ]
+ },
+ "oli-atletismo": {
+  "cara": "moedas/oli-atletismo-cara.webp",
+  "coroa": "moedas/oli-atletismo-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1Real_Olympic_Games_Rio_2016_-_Atletism_cropped_.png",
+   "1Real_Olympic_Games_Rio_2016_-_Atletism_.png"
+  ]
+ },
+ "oli-paratriatlo": {
+  "cara": "moedas/oli-paratriatlo-cara.webp",
+  "coroa": "moedas/oli-paratriatlo-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Paratriathlon_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Paratriathlon_.png"
+  ]
+ },
+ "oli-golf": {
+  "cara": "moedas/oli-golf-cara.webp",
+  "coroa": "moedas/oli-golf-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Golf_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Golf_.png"
+  ]
+ },
+ "oli-natacao": {
+  "cara": "moedas/oli-natacao-cara.webp",
+  "coroa": "moedas/oli-natacao-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Swimming_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Swimming_.png"
+  ]
+ },
+ "oli-basquete": {
+  "cara": "moedas/oli-basquete-cara.webp",
+  "coroa": "moedas/oli-basquete-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Basketball_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Basketball_.png"
+  ]
+ },
+ "oli-paracanoagem": {
+  "cara": "moedas/oli-paracanoagem-cara.webp",
+  "coroa": "moedas/oli-paracanoagem-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Paracanoe_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Paracanoe_.png"
+  ]
+ },
+ "oli-vela": {
+  "cara": "moedas/oli-vela-cara.webp",
+  "coroa": "moedas/oli-vela-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Sailing_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Sailing_.png"
+  ]
+ },
+ "oli-rugby": {
+  "cara": "moedas/oli-rugby-cara.webp",
+  "coroa": "moedas/oli-rugby-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Rugby_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Rugby_.png"
+  ]
+ },
+ "oli-futebol": {
+  "cara": "moedas/oli-futebol-cara.webp",
+  "coroa": "moedas/oli-futebol-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Soccer_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Soccer_.png"
+  ]
+ },
+ "oli-volei": {
+  "cara": "moedas/oli-volei-cara.webp",
+  "coroa": "moedas/oli-volei-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Volleyball_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Volleyball_.png"
+  ]
+ },
+ "oli-atletismo-paralimpico": {
+  "cara": "moedas/oli-atletismo-paralimpico-cara.webp",
+  "coroa": "moedas/oli-atletismo-paralimpico-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Paralympic_Athletics_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Paralympic_Athletics_.png"
+  ]
+ },
+ "oli-judo": {
+  "cara": "moedas/oli-judo-cara.webp",
+  "coroa": "moedas/oli-judo-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Judo_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Judo_.png"
+  ]
+ },
+ "oli-natacao-paralimpica": {
+  "cara": "moedas/oli-natacao-paralimpica-cara.webp",
+  "coroa": "moedas/oli-natacao-paralimpica-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Paralympic_Swimming_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Paralympic_Swimming_.png"
+  ]
+ },
+ "oli-boxe": {
+  "cara": "moedas/oli-boxe-cara.webp",
+  "coroa": "moedas/oli-boxe-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Boxing_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Boxing_.png"
+  ]
+ },
+ "oli-mascote-olimpico": {
+  "cara": "moedas/oli-mascote-olimpico-cara.webp",
+  "coroa": "moedas/oli-mascote-olimpico-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Olympic_Mascot_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Olympic_Mascot_.png"
+  ]
+ },
+ "oli-mascote-paralimpico": {
+  "cara": "moedas/oli-mascote-paralimpico-cara.webp",
+  "coroa": "moedas/oli-mascote-paralimpico-coroa.webp",
+  "credito": "Wikimedia Commons — Rawlan1998 (CC BY-SA 4.0)",
+  "origem": [
+   "1_Real_Olympic_Games_Rio_2016_-_Paralympic_Mascot_cropped_.png",
+   "1_Real_Olympic_Games_Rio_2016_-_Paralympic_Mascot_.png"
+  ]
+ }
+}

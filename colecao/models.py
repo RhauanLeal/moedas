@@ -61,7 +61,20 @@ class Moeda(models.Model):
         max_length=150, blank=True, help_text='Tema da comemorativa/olímpica. Ex.: "Basquete".'
     )
     ordem = models.PositiveIntegerField(default=0, help_text="Ordem dentro da série (opcional)")
-    busca = models.CharField(max_length=300, editable=False, db_index=True, default="")
+    foto_cara = models.CharField(
+        "foto da cara", max_length=200, blank=True,
+        help_text='Caminho dentro de static/, ex.: "moedas/f2-5-cara.webp" (lado do retrato/tema).',
+    )
+    foto_coroa = models.CharField(
+        "foto da coroa", max_length=200, blank=True,
+        help_text='Caminho dentro de static/, ex.: "moedas/f2-5-coroa.webp" (lado do valor).',
+    )
+    foto_credito = models.CharField("crédito das fotos", max_length=400, blank=True)
+    como_identificar = models.TextField(
+        "como identificar", blank=True,
+        help_text='Dica para distinguir esta moeda de outra parecida. Ex.: "Letra A no canto inferior esquerdo".',
+    )
+    busca =models.CharField(max_length=300, editable=False, db_index=True, default="")
 
     class Meta:
         ordering = ["serie__ordem", "denominacao__valor_centavos", "ordem", "ano", "variante"]
@@ -75,6 +88,10 @@ class Moeda(models.Model):
     @property
     def ano_rotulo(self):
         return f"{self.ano}{self.variante}"
+
+    @property
+    def tem_foto(self):
+        return bool(self.foto_cara or self.foto_coroa)
 
     @property
     def metal(self):

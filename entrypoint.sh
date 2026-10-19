@@ -7,6 +7,9 @@ python manage.py migrate --noinput
 echo ">> Conferindo catálogo de moedas..."
 python manage.py carregar_catalogo
 
+echo ">> Ligando as fotos às moedas..."
+python manage.py carregar_fotos
+
 # Cria o usuário de login na primeira subida (se ainda não existir).
 if [ -n "$DJANGO_SUPERUSER_USERNAME" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
   python manage.py createsuperuser --noinput \

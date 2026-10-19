@@ -3,3 +3,6 @@ db.sqlite3
 staticfiles/
 __pycache__/
 *.pyc
+_fotos_rascunho/originais/
+_fotos_rascunho/originais_hd/
+_fotos_rascunho/folhas/

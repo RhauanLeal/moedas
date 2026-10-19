@@ -18,11 +18,15 @@ class DenominacaoAdmin(admin.ModelAdmin):
 
 @admin.register(Moeda)
 class MoedaAdmin(admin.ModelAdmin):
-    list_display = ("denominacao", "ano", "variante", "descricao", "serie")
+    list_display = ("denominacao", "ano", "variante", "descricao", "serie", "com_foto")
     list_filter = ("serie__tipo", "serie", "denominacao")
     search_fields = ("busca",)
     list_select_related = ("serie", "denominacao")
     actions = ["criar_aviso"]
+
+    @admin.display(boolean=True, description="Foto")
+    def com_foto(self, obj):
+        return obj.tem_foto
 
     @admin.action(description="Avisar os usuários sobre estas moedas (notificação)")
     def criar_aviso(self, request, queryset):

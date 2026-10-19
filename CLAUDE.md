@@ -19,6 +19,10 @@ Responda sempre em português do Brasil.
 - `colecao/push.py` — envio de push; `colecao/admin.py` — salvar um Aviso novo dispara o envio
 - `colecao/management/commands/carregar_catalogo.py` — catálogo das 193 moedas (idempotente, roda no entrypoint)
 - `colecao/management/commands/gerar_chaves_push.py` — gera VAPID
+- Fotos: `Moeda.foto_cara/foto_coroa/foto_credito/como_identificar`; arquivos em `static/moedas/*.webp` (da Wikimedia Commons, licença livre),
+  mapa e créditos em `colecao/fotos.json`, regra moeda→desenho em `colecao/fotos.py`, carga idempotente em `carregar_fotos` (roda no entrypoint;
+  não sobrescreve ajustes do admin sem `--forcar`). Cara = retrato/tema, coroa = valor. Foto é por desenho (o ano não muda a imagem).
+  Os scripts que montaram as imagens estão em `_fotos_rascunho/` (`montar_fotos.py`, `gerar_conferencia.py`)
 - `templates/` — base, `sw.js` (service worker renderizado pelo Django), overrides do allauth (`account/`, `allauth/layouts/base.html`)
 
 ## Convenções
