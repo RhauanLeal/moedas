@@ -18,7 +18,7 @@ from .models import Aviso, InscricaoPush, PerfilPublico, novo_token
 from .pix import payload_pix, qr_svg
 from .views import agrupar_por_serie, moedas_com_colecao, progresso, series_com_progresso
 
-VERSAO_CACHE = "v5"  # aumente quando mudar o service worker para forçar atualização
+VERSAO_CACHE = "v6"  # aumente quando mudar o service worker para forçar atualização
 
 
 # ---------- conta ----------
@@ -99,16 +99,22 @@ def colecao_publica(request, token):
 @login_required
 def excluir_conta(request):
     """Exclusão definitiva da conta e da coleção (exigência da LGPD e da Play Store)."""
+    tem_senha = request.user.has_usable_password()
     if request.method == "POST":
         if request.POST.get("confirmacao", "").strip().upper() != "EXCLUIR":
-            messages.error(request, 'Digite EXCLUIR para confirmar.')
+            messages.error(request, "Digite EXCLUIR para confirmar.")
             return redirect("excluir_conta")
+        if tem_senha:
+            senha = request.POST.get("senha", "")
+            if not request.user.check_password(senha):
+                messages.error(request, "Senha incorreta. Não foi possível excluir a conta.")
+                return redirect("excluir_conta")
         user = request.user
         logout(request)
         user.delete()  # apaga também a coleção, inscrições de notificação e logins do Google
         messages.success(request, "Sua conta e sua coleção foram excluídas.")
         return redirect("account_login")
-    return render(request, "colecao/excluir_conta.html")
+    return render(request, "colecao/excluir_conta.html", {"tem_senha": tem_senha})
 
 
 def privacidade(request):
@@ -187,6 +193,29 @@ def offline(request):
     return render(request, "colecao/offline.html")
 
 
+from urllib.parse import urlparse
+
+DOMINIOS_PUSH_CONFIÁVEIS = (
+    "googleapis.com",
+    "push.apple.com",
+    "notify.windows.com",
+    "push.services.mozilla.com",
+)
+
+
+def endpoint_push_valido(endpoint: str) -> bool:
+    try:
+        parsed = urlparse(endpoint)
+        if parsed.scheme != "https":
+            return False
+        host = (parsed.hostname or "").lower()
+        if not host:
+            return False
+        return any(host == d or host.endswith("." + d) for d in DOMINIOS_PUSH_CONFIÁVEIS)
+    except Exception:
+        return False
+
+
 # ---------- notificações ----------
 
 @login_required
@@ -199,7 +228,7 @@ def push_inscrever(request):
         p256dh, auth = chaves["p256dh"], chaves["auth"]
     except (ValueError, KeyError, TypeError):
         return HttpResponseBadRequest("inscrição inválida")
-    if not endpoint.startswith("https://"):
+    if not endpoint_push_valido(endpoint):
         return HttpResponseBadRequest("endpoint inválido")
     InscricaoPush.objects.update_or_create(
         endpoint=endpoint, defaults={"user": request.user, "p256dh": p256dh, "auth": auth}

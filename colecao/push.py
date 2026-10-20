@@ -19,10 +19,14 @@ def enviar_aviso(aviso: Aviso) -> int:
         return 0
     from pywebpush import WebPushException, webpush
 
-    payload = json.dumps(
-        {"title": aviso.titulo, "body": aviso.texto, "url": aviso.link or "/novidades/"}
-    )
-    claims = {"sub": f"mailto:{settings.VAPID_EMAIL or 'admin@localhost'}"}
+    url = (aviso.link or "/novidades/").strip()
+    if not url.startswith("/"):
+        url = "/novidades/"
+    payload = json.dumps({"title": aviso.titulo, "body": aviso.texto, "url": url})
+    email_vapid = (settings.VAPID_EMAIL or "admin@localhost").strip()
+    if email_vapid.startswith("mailto:"):
+        email_vapid = email_vapid[7:]
+    claims = {"sub": f"mailto:{email_vapid}"}
     enviados = 0
     for inscricao in InscricaoPush.objects.all().iterator():
         try:
@@ -35,7 +39,7 @@ def enviar_aviso(aviso: Aviso) -> int:
                 vapid_private_key=settings.VAPID_PRIVATE_KEY,
                 vapid_claims=dict(claims),
                 ttl=60 * 60 * 24,
-                timeout=10,
+                timeout=5,
             )
             enviados += 1
         except WebPushException as e:

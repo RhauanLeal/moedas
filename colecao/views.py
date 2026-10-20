@@ -183,7 +183,7 @@ def faltando(request):
 
 @login_required
 def buscar(request):
-    q = request.GET.get("q", "").strip()
+    q = request.GET.get("q", "").strip()[:100]
     moedas = buscar_moedas(request.user, q) if q else None
     return render(
         request,

@@ -19,6 +19,9 @@ def env_list(nome, padrao=""):
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-inseguro-troque-no-env")
 DEBUG = env_bool("DJANGO_DEBUG", False)
+EM_TESTES = "test" in sys.argv
+if not DEBUG and not EM_TESTES and SECRET_KEY == "dev-inseguro-troque-no-env":
+    raise RuntimeError("DJANGO_SECRET_KEY é obrigatória em produção (DEBUG=False). Defina-a no .env.")
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", "")
 
@@ -96,8 +99,10 @@ else:
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 LANGUAGE_CODE = "pt-br"
@@ -135,9 +140,9 @@ ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION") or "none"
 CADASTRO_ABERTO = env_bool("CADASTRO_ABERTO", True) if os.environ.get("CADASTRO_ABERTO") else True
 
-# Login com Google conecta na conta que já tenha o mesmo e-mail (o Google verifica o e-mail).
+# Login com Google conecta na conta que já tenha o mesmo e-mail (só conecta direto se o e-mail for verificado).
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
-SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = ACCOUNT_EMAIL_VERIFICATION != "none"
 SOCIALACCOUNT_PROVIDERS = {}
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
@@ -208,8 +213,14 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 90
 # pelo cabeçalho X-Forwarded-Proto. Em teste pela rede local (http) deixe
 # DJANGO_SECURE_COOKIES=False, senão o login não funciona.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SESSION_COOKIE_SECURE = env_bool("DJANGO_SECURE_COOKIES", False)
+SESSION_COOKIE_SECURE = env_bool("DJANGO_SECURE_COOKIES", not DEBUG)
 CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
+
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 ano
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 LOGGING = {
     "version": 1,

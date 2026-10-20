@@ -179,6 +179,14 @@ class Aviso(models.Model):
     def __str__(self):
         return self.titulo
 
+    def clean(self):
+        super().clean()
+        if self.link:
+            self.link = self.link.strip()
+            if not self.link.startswith("/"):
+                from django.core.exceptions import ValidationError
+                raise ValidationError({"link": "O link deve ser um caminho interno do app começando com '/' (ex.: /serie/2/)."})
+
 
 class InscricaoPush(models.Model):
     """Um navegador/celular que aceitou receber notificações."""

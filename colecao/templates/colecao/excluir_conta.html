@@ -9,6 +9,10 @@
       {% csrf_token %}
       <label for="id_confirmacao" class="rotulo">Para confirmar, digite <b>EXCLUIR</b></label>
       <input id="id_confirmacao" name="confirmacao" autocomplete="off" autocapitalize="characters" class="campo" required>
+      {% if tem_senha %}
+      <label for="id_senha" class="rotulo" style="margin-top:12px">Sua senha atual</label>
+      <input id="id_senha" name="senha" type="password" autocomplete="current-password" class="campo" required>
+      {% endif %}
       <div class="acoes">
         <a class="btn sec" href="{% url 'conta' %}">Cancelar</a>
         <button class="btn perigo-cheio" type="submit">Excluir para sempre</button>

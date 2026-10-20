@@ -6,7 +6,7 @@
 
   <h2>Avisos</h2>
   {% for a in avisos %}
-    <a class="aviso-card" href="{{ a.link|default:'#' }}">
+    <a class="aviso-card" href="{% if a.link and a.link|slice:':1' == '/' %}{{ a.link }}{% else %}#{% endif %}">
       <div class="aviso-titulo">{{ a.titulo }}</div>
       <div class="aviso-texto">{{ a.texto }}</div>
       <time datetime="{{ a.criado_em|date:'c' }}">{{ a.criado_em|date:"d/m/Y" }}</time>

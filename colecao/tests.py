@@ -132,9 +132,14 @@ class MultiusuarioTests(TestCase):
     def test_excluir_conta_apaga_colecao(self):
         self.client.force_login(self.ana)
         self.client.post(reverse("marcar", args=[self.moeda.pk]))
-        r = self.client.post(reverse("excluir_conta"), {"confirmacao": "errado"})
+        # Confirmação errada
+        r = self.client.post(reverse("excluir_conta"), {"confirmacao": "errado", "senha": "senha-de-teste-123"})
         self.assertTrue(User.objects.filter(pk=self.ana.pk).exists())
-        r = self.client.post(reverse("excluir_conta"), {"confirmacao": "excluir"})
+        # Senha errada
+        r = self.client.post(reverse("excluir_conta"), {"confirmacao": "EXCLUIR", "senha": "senha-errada"})
+        self.assertTrue(User.objects.filter(pk=self.ana.pk).exists())
+        # Correto: apaga
+        r = self.client.post(reverse("excluir_conta"), {"confirmacao": "excluir", "senha": "senha-de-teste-123"})
         self.assertRedirects(r, reverse("account_login"), fetch_redirect_response=False)
         self.assertFalse(User.objects.filter(pk=self.ana.pk).exists())
         self.assertFalse(ItemColecao.objects.filter(user_id=self.ana.pk).exists())
@@ -216,25 +221,30 @@ class PushTests(TestCase):
         self.client.force_login(self.user)
 
     def test_inscrever_e_cancelar(self):
-        dados = {"endpoint": "https://push.exemplo/abc", "keys": {"p256dh": "AAA", "auth": "BBB"}}
+        dados = {"endpoint": "https://fcm.googleapis.com/fcm/send/abc", "keys": {"p256dh": "AAA", "auth": "BBB"}}
         r = self.client.post(reverse("push_inscrever"), json.dumps(dados), content_type="application/json")
         self.assertEqual(r.status_code, 200)
         self.assertEqual(InscricaoPush.objects.filter(user=self.user).count(), 1)
         r = self.client.post(reverse("push_cancelar"), json.dumps({"endpoint": dados["endpoint"]}), content_type="application/json")
         self.assertEqual(InscricaoPush.objects.count(), 0)
 
-    def test_inscricao_invalida(self):
+    def test_inscricao_invalida_ou_ssrf(self):
+        # JSON vazio
         r = self.client.post(reverse("push_inscrever"), "{}", content_type="application/json")
         self.assertEqual(r.status_code, 400)
+        # Endpoint interno / SSRF bloqueado
+        dados_ssrf = {"endpoint": "https://192.168.30.6/push", "keys": {"p256dh": "AAA", "auth": "BBB"}}
+        r = self.client.post(reverse("push_inscrever"), json.dumps(dados_ssrf), content_type="application/json")
+        self.assertEqual(r.status_code, 400)
 
-    @override_settings(VAPID_PUBLIC_KEY="pub", VAPID_PRIVATE_KEY="priv", VAPID_EMAIL="a@b.c")
+    @override_settings(VAPID_PUBLIC_KEY="pub", VAPID_PRIVATE_KEY="priv", VAPID_EMAIL="mailto:a@b.c")
     def test_envio_remove_inscricao_expirada(self):
         from pywebpush import WebPushException
 
         from .push import enviar_aviso
 
-        InscricaoPush.objects.create(user=self.user, endpoint="https://push.exemplo/ok", p256dh="a", auth="b")
-        InscricaoPush.objects.create(user=self.user, endpoint="https://push.exemplo/velha", p256dh="a", auth="b")
+        InscricaoPush.objects.create(user=self.user, endpoint="https://fcm.googleapis.com/ok", p256dh="a", auth="b")
+        InscricaoPush.objects.create(user=self.user, endpoint="https://fcm.googleapis.com/velha", p256dh="a", auth="b")
         aviso = Aviso.objects.create(titulo="Moeda nova", texto="1 Real 2026")
 
         def falso_webpush(subscription_info, **kw):
@@ -242,11 +252,12 @@ class PushTests(TestCase):
                 resp = mock.Mock(status_code=410)
                 raise WebPushException("gone", response=resp)
             self.assertEqual(json.loads(kw["data"])["title"], "Moeda nova")
+            self.assertEqual(kw["vapid_claims"]["sub"], "mailto:a@b.c")
 
         with mock.patch("pywebpush.webpush", side_effect=falso_webpush):
             n = enviar_aviso(aviso)
         self.assertEqual(n, 1)
-        self.assertEqual(list(InscricaoPush.objects.values_list("endpoint", flat=True)), ["https://push.exemplo/ok"])
+        self.assertEqual(list(InscricaoPush.objects.values_list("endpoint", flat=True)), ["https://fcm.googleapis.com/ok"])
 
     def test_chaves_vapid_funcionam_com_pywebpush(self):
         from io import StringIO
@@ -263,6 +274,15 @@ class PushTests(TestCase):
         Aviso.objects.create(titulo="Teste de aviso", texto="texto")
         self.assertContains(self.client.get(reverse("novidades")), "Teste de aviso")
         self.assertContains(self.client.get(reverse("conta")), "ana@ex.com")
+
+    def test_aviso_link_validacao(self):
+        from django.core.exceptions import ValidationError
+
+        a = Aviso(titulo="Teste", texto="Texto", link="https://site-externo.com")
+        with self.assertRaises(ValidationError):
+            a.full_clean()
+        a_ok = Aviso(titulo="Teste", texto="Texto", link="/serie/1/")
+        a_ok.full_clean()
 
     def test_apoie_pix(self):
         self.assertNotContains(self.client.get(reverse("conta")), "Apoie o projeto")
