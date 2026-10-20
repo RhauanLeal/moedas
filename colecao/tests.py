@@ -445,3 +445,38 @@ class ColecaoPublicaTests(TestCase):
         r = self.client.post(reverse("compartilhar_colecao"), {"acao": "ativar"})
         self.assertEqual(r.status_code, 302)
         self.assertIn(reverse("account_login"), r["Location"])
+
+    def test_compartilhar_estado_opcional(self):
+        m = Moeda.objects.first()
+        ItemColecao.objects.create(user=self.user, moeda=m, quantidade=1, estado="SOB")
+        perfil = self.ativar()
+        self.assertFalse(perfil.compartilhar_estado)
+        r = self.client.get(reverse("colecao_publica", args=[perfil.token]))
+        self.assertNotContains(r, '<span class="est">SOB</span>')
+
+        # Ativa compartilhamento do estado
+        self.client.force_login(self.user)
+        self.client.post(
+            reverse("compartilhar_colecao"),
+            {"acao": "salvar", "nome": "Rhauan", "compartilhar_estado": "1"},
+        )
+        self.client.logout()
+        perfil.refresh_from_db()
+        self.assertTrue(perfil.compartilhar_estado)
+
+        r = self.client.get(reverse("colecao_publica", args=[perfil.token]))
+        self.assertContains(r, '<span class="est">SOB</span>')
+
+        # Desativa compartilhamento do estado
+        self.client.force_login(self.user)
+        self.client.post(
+            reverse("compartilhar_colecao"),
+            {"acao": "salvar", "nome": "Rhauan"},
+        )
+        self.client.logout()
+        perfil.refresh_from_db()
+        self.assertFalse(perfil.compartilhar_estado)
+
+        r = self.client.get(reverse("colecao_publica", args=[perfil.token]))
+        self.assertNotContains(r, '<span class="est">SOB</span>')
+

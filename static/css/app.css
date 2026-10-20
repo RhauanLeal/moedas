@@ -310,12 +310,34 @@ a.btn { display: inline-flex; align-items: center; justify-content: center; text
 .acoes-compartilhar { flex-wrap: wrap; }
 
 /* ---------- coleção pública ---------- */
-.campo-link, .form-nome input { width: 100%; box-sizing: border-box; min-height: 44px; border-radius: 12px; border: 1.5px solid var(--linha); background: var(--fundo); color: var(--texto); font: inherit; padding: 0 10px; }
+.campo-link, .form-nome input:not([type=checkbox]) { width: 100%; box-sizing: border-box; min-height: 44px; border-radius: 12px; border: 1.5px solid var(--linha); background: var(--fundo); color: var(--texto); font: inherit; padding: 0 10px; }
 .form-nome { display: block; margin: 12px 0; }
 .form-nome .btn { margin-top: 8px; width: 100%; }
-.chip.publico { display: inline-flex; align-items: center; justify-content: center; cursor: default; }
+.campo-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--texto);
+  margin: 14px 0 16px;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1.35;
+}
+.campo-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  accent-color: var(--destaque);
+  cursor: pointer;
+  margin: 0;
+  flex-shrink: 0;
+}
+.chip.publico { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; cursor: default; }
+.chips.largos .chip.publico { flex-direction: row; }
 .chip.publico:active { transform: none; }
 .pub-topo { text-align: center; margin: 8px 0 4px; }
 .pub-topo h1 { margin-bottom: 2px; }
 .serie-resumo { font-size: 14px; color: var(--texto-2); font-weight: 400; }
 .pub-rodape { text-align: center; margin: 28px 0 12px; }
+

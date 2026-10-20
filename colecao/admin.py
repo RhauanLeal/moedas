@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 
-from .models import Aviso, Denominacao, InscricaoPush, ItemColecao, Moeda, Serie
+from .models import Aviso, Denominacao, InscricaoPush, ItemColecao, Moeda, PerfilPublico, Serie
 from .push import enviar_aviso, push_configurado
 
 
@@ -90,3 +90,12 @@ class AvisoAdmin(admin.ModelAdmin):
 class InscricaoPushAdmin(admin.ModelAdmin):
     list_display = ("user", "criado_em", "endpoint")
     raw_id_fields = ("user",)
+
+
+@admin.register(PerfilPublico)
+class PerfilPublicoAdmin(admin.ModelAdmin):
+    list_display = ("user", "nome", "ativo", "compartilhar_estado")
+    list_filter = ("ativo", "compartilhar_estado")
+    search_fields = ("user__email", "user__username", "nome")
+    raw_id_fields = ("user",)
+

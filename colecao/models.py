@@ -222,6 +222,11 @@ class PerfilPublico(models.Model):
     ativo = models.BooleanField(default=False)
     token = models.CharField(max_length=40, unique=True, default=novo_token, editable=False)
     nome = models.CharField("nome na página pública", max_length=40, blank=True)
+    compartilhar_estado = models.BooleanField(
+        "compartilhar estado das moedas",
+        default=False,
+        help_text="Exibe o estado de conservação (ex.: MBC, SOB, FC) na página pública.",
+    )
 
     class Meta:
         verbose_name = "perfil público"

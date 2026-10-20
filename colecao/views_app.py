@@ -18,7 +18,7 @@ from .models import Aviso, InscricaoPush, PerfilPublico, novo_token
 from .pix import payload_pix, qr_svg
 from .views import agrupar_por_serie, moedas_com_colecao, progresso, series_com_progresso
 
-VERSAO_CACHE = "v6"  # aumente quando mudar o service worker para forçar atualização
+VERSAO_CACHE = "v7"  # aumente quando mudar o service worker para forçar atualização
 
 
 # ---------- conta ----------
@@ -43,11 +43,12 @@ def conta(request):
 @login_required
 @require_POST
 def compartilhar_colecao(request):
-    """Liga/desliga o link público da coleção, troca o link ou o nome exibido."""
+    """Liga/desliga o link público da coleção, troca o link ou as opções de compartilhamento."""
     perfil, _ = PerfilPublico.objects.get_or_create(user=request.user)
     acao = request.POST.get("acao")
     if acao == "ativar":
         perfil.nome = request.POST.get("nome", "").strip()[:40] or perfil.nome
+        perfil.compartilhar_estado = request.POST.get("compartilhar_estado") == "1"
         perfil.ativo = True
         messages.success(request, "Link ativado. Quem tiver o link poderá ver sua coleção.")
     elif acao == "desativar":
@@ -56,9 +57,10 @@ def compartilhar_colecao(request):
     elif acao == "novo_link":
         perfil.token = novo_token()
         messages.success(request, "Novo link gerado. O anterior deixou de funcionar.")
-    elif acao == "nome":
+    elif acao in ("nome", "salvar", "atualizar"):
         perfil.nome = request.POST.get("nome", "").strip()[:40]
-        messages.success(request, "Nome atualizado.")
+        perfil.compartilhar_estado = request.POST.get("compartilhar_estado") == "1"
+        messages.success(request, "Opções atualizadas.")
     perfil.save()
     return redirect(reverse("conta") + "#compartilhar-colecao")
 
