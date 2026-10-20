@@ -74,6 +74,15 @@ class TelasTests(TestCase):
         self.assertContains(self.client.get(reverse("serie", args=[serie.pk])), "2019A")
         self.assertEqual(self.client.get(reverse("faltando")).status_code, 200)
 
+    def test_ordem_series_inicio(self):
+        r = self.client.get(reverse("inicio"))
+        secoes = dict(r.context["secoes"])
+        nomes_familia = [s.nome for s in secoes["Família"]]
+        self.assertEqual(nomes_familia, ["1ª Família", "2ª Família"])
+        nomes_olimpiadas = [s.nome for s in secoes["Olimpíadas"]]
+        self.assertEqual(nomes_olimpiadas[0], "Olimpíadas 2012 – Entrega da Bandeira")
+        self.assertEqual(nomes_olimpiadas[1], "Olimpíadas 2014 – 1ª Série")
+
     def test_busca(self):
         r = self.client.get(reverse("buscar"), {"q": "50 2008"})
         self.assertContains(r, "2008")

@@ -45,7 +45,7 @@ def series_com_progresso(user):
         .values_list("moeda__serie")
         .annotate(n=Count("id"))
     )
-    series = list(Serie.objects.annotate(total=Count("moedas")))
+    series = list(Serie.objects.annotate(total=Count("moedas")).order_by("ordem", "nome"))
     for s in series:
         s.tenho = tenho_por_serie.get(s.pk, 0)
         s.pct = _pct(s.tenho, s.total)
