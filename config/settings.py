@@ -19,8 +19,9 @@ def env_list(nome, padrao=""):
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-inseguro-troque-no-env")
 DEBUG = env_bool("DJANGO_DEBUG", False)
-EM_TESTES = "test" in sys.argv
-if not DEBUG and not EM_TESTES and SECRET_KEY == "dev-inseguro-troque-no-env":
+COMANDOS_SEM_ENV = ("test", "collectstatic")
+EM_BUILD_OU_TESTE = any(cmd in sys.argv for cmd in COMANDOS_SEM_ENV)
+if not DEBUG and not EM_BUILD_OU_TESTE and SECRET_KEY == "dev-inseguro-troque-no-env":
     raise RuntimeError("DJANGO_SECRET_KEY é obrigatória em produção (DEBUG=False). Defina-a no .env.")
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", "")
