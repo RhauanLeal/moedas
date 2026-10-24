@@ -11,7 +11,7 @@ Django 5.2 + HTMX + PostgreSQL, rodando em Docker.
 - **App instalável (PWA)**: ícone na tela inicial, tela cheia e páginas já visitadas abrem sem internet.
 - **Notificações**: aviso no celular quando sai moeda nova (você dispara pelo admin).
 - **Admin** (`/admin/`): cadastrar moedas novas (ex.: 2027 ou uma nova comemorativa) e mandar avisos.
-- **LGPD**: política de privacidade em `/privacidade/` e exclusão da conta pelo próprio usuário.
+- **LGPD**: termos de uso e política de privacidade em `/privacidade/` e exclusão da conta pelo próprio usuário.
 
 O catálogo das 193 moedas da lista de controle é carregado automaticamente na primeira subida.
 A coleção que já existia antes das contas fica com o primeiro administrador (o usuário `rhauan`).

@@ -24,5 +24,5 @@
     <a href="{% url 'account_reset_password' %}">Esqueci a senha</a>
     {% if cadastro_aberto %} · <a href="{% url 'account_signup' %}{% if redirect_field_value %}?{{ redirect_field_name }}={{ redirect_field_value|urlencode }}{% endif %}">Criar conta</a>{% endif %}
   </p>
-  <p class="auth-rodape"><a href="{% url 'privacidade' %}">Política de privacidade</a></p>
+  <p class="auth-rodape">Ao entrar ou criar uma conta, inclusive com Google, Microsoft ou Apple, você concorda com os <a href="{% url 'privacidade' %}">termos de uso e a política de privacidade</a>.</p>
 {% endblock %}

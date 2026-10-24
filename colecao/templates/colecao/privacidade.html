@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block titulo %}Política de privacidade · Moedas do Real{% endblock %}
+{% block titulo %}Termos e privacidade · Moedas do Real{% endblock %}
 {% block conteudo %}
   <article class="texto-longo">
-    <h1>Política de privacidade</h1>
+    <h1>Termos e privacidade</h1>
     <p><i>Última atualização: outubro de 2026.</i></p>
 
     <h3>Quais dados guardamos</h3>
@@ -16,13 +16,17 @@
     <p>Somente para fazer o app funcionar: entrar na sua conta, mostrar a sua coleção e enviar os avisos que você ativou. Não vendemos nem compartilhamos seus dados, e não usamos rastreadores de publicidade.</p>
 
     <h3>Compartilhamento da coleção</h3>
-    <p>Por padrão, sua coleção é privada. Se você ativar o link de compartilhamento, qualquer pessoa com o link poderá ver, sem login e só para leitura, as moedas que você tem, as que faltam, as repetidas e o nome que você escolheu (nunca seu e-mail). Estado, datas e observações não são exibidos. Você pode desativar o link ou gerar um novo a qualquer momento em Minha conta.</p>
+    <p>Por padrão, sua coleção é privada. Se você ativar o link de compartilhamento, qualquer pessoa com o link poderá ver, sem login e só para leitura, as moedas que você tem, as que faltam, as repetidas e o nome que você escolheu (nunca seu e-mail). O estado de conservação só aparece se você ativar essa opção; datas e observações nunca são exibidas. Você pode desativar o link ou gerar um novo a qualquer momento em Minha conta.</p>
 
     <h3>Cookies</h3>
     <p>Usamos apenas os cookies necessários para manter você conectado e proteger os formulários.</p>
 
     <h3>Seus direitos (LGPD)</h3>
     <p>Você pode ver e corrigir seus dados no próprio app e pode <a href="{% url 'excluir_conta' %}">excluir sua conta</a> a qualquer momento — isso apaga a conta e toda a coleção de forma definitiva.</p>
+
+    <h3>Disponibilidade do serviço</h3>
+    <p>O Moedas do Real é um projeto pessoal, gratuito e mantido de forma voluntária. Ele é oferecido como está, sem garantia de funcionamento contínuo: pode ficar fora do ar, mudar ou ser encerrado definitivamente a qualquer momento, inclusive sem aviso prévio. Sempre que possível, avisaremos com antecedência pelo próprio app.</p>
+    <p>Não use o app como único registro da sua coleção. Se o serviço for encerrado, as contas e coleções serão apagadas.</p>
 
     {% if contato_email %}
     <h3>Contato</h3>

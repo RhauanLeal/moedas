@@ -200,7 +200,7 @@ VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY", "")
 VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY", "")
 VAPID_EMAIL = os.environ.get("VAPID_EMAIL", "")
 
-# Contato exibido na política de privacidade
+# Contato exibido na página Termos e privacidade
 CONTATO_EMAIL = os.environ.get("CONTATO_EMAIL", "")
 
 # Doação por Pix (tela "Minha conta"). Vazio = o cartão de apoio não aparece.
