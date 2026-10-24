@@ -480,3 +480,16 @@ class ColecaoPublicaTests(TestCase):
         r = self.client.get(reverse("colecao_publica", args=[perfil.token]))
         self.assertNotContains(r, '<span class="est">SOB</span>')
 
+
+
+class SaudeTests(TestCase):
+    @override_settings(ALLOWED_HOSTS=["moedas.exemplo.com"])
+    def test_responde_ok_mesmo_com_host_fora_do_allowed_hosts(self):
+        resp = self.client.get("/saude/", HTTP_HOST="localhost")
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content, b"ok")
+
+    def test_banco_fora_do_ar_retorna_503(self):
+        with mock.patch("colecao.middleware.connection.cursor", side_effect=Exception("sem banco")):
+            resp = self.client.get("/saude/")
+        self.assertEqual(resp.status_code, 503)
