@@ -47,10 +47,20 @@ Responda sempre em português do Brasil.
 - Rodar testes antes de terminar: `python manage.py test colecao` (sem DB_HOST usa SQLite)
 
 ## Ambiente
-- Dev atual: Windows, Docker Desktop, pasta `F:\python\moedas`, app em http://localhost:8020
-  Banco: Postgres do container `postgres_snfisc`, acessado do container como `host.docker.internal:5433`, banco/usuário `moedas`
-- Produção planejada: VM `ubuntu-server` (192.168.30.6, projetos em `/srv/projects`), Postgres na VM `ubuntu-postgresql`,
-  publicado via Cloudflare Tunnel em https://moedas.linario.dev.br
+- Produção (no ar, versão 2.0 desde 2026-10-25): VM `ubuntu-server` (homelab, 192.168.30.6), pasta `/srv/projects/moedas`,
+  publicada via Cloudflare Tunnel em https://moedas.linario.dev.br. Banco real: `moedas` (usuário `moedas`) no Postgres da VM
+  `ubuntu-postgresql`. Atualizar: na VM, `git pull` + `docker compose up -d --build` (o entrypoint roda as migrations sozinho).
+  Antes de qualquer migration: backup do `moedas` (pgAdmin › Backup, formato Custom). Fotos enviadas ficam no volume Docker
+  `*_media` da VM e também entram no backup
+- Dev: Windows, Docker Desktop, pasta `C:\python\moedas`, app em http://localhost:8030. O Postgres é alcançado pelo túnel SSH
+  (`DB_HOST=host.docker.internal`, `DB_PORT=15432`); o usuário administra o banco pelo pgAdmin pelo mesmo túnel.
+  O `.env` do dev deve usar `DB_NAME=moedas_teste` (cópia do real) — com `moedas` o dev mexe no banco de produção
+- Testar mudanças grandes sem mexer na main: `git worktree add ..\moedas-v2 -b <branch>` (pasta `C:\python\moedas-v2`), copiar o
+  `.env` com `DB_NAME=moedas_teste`, `PORTA=8031`, `EMAIL_HOST=` e chaves VAPID vazias (o banco de teste tem e-mails e inscrições
+  push de pessoas reais), e criar um `docker-compose.override.yml` com `container_name: moedas-v2` (já ignorado em
+  `.git/info/exclude`). Abrir em http://127.0.0.1:8031 (não `localhost`, para não misturar os cookies com a 8030).
+  Para recriar o `moedas_teste` a partir do real: `dumpdata` no container do app (só leitura) e `loaddata` com a imagem da mesma
+  versão do código que gerou os dados; depois `migrate`. Merge na main só depois de testado
 - PWA e push só funcionam em HTTPS ou localhost
 - O usuário se considera leigo em administração de servidores: ao passar comandos, diga SEMPRE onde rodar
   (PowerShell do Windows, VM ubuntu-server, VM ubuntu-postgresql, host Proxmox, dentro do container…)
