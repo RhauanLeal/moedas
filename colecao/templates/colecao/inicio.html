@@ -1,23 +1,57 @@
 {% extends "base.html" %}
+{% block titulo %}{% if colecao.e_real %}Moedas do Real{% else %}{{ colecao.nome }} · Moedas do Real{% endif %}{% endblock %}
 {% block conteudo %}
+  <nav class="seletor-colecoes" aria-label="Coleções">
+    {% for c in colecoes %}<a href="{% url 'abrir_colecao' c.pk %}"{% if c.pk == colecao.pk %} class="ativo" aria-current="true"{% endif %}>{{ c.nome }}</a>{% endfor %}
+    {% if colecao not in colecoes %}<a href="{% url 'abrir_colecao' colecao.pk %}" class="ativo" aria-current="true">{{ colecao.nome }}</a>{% endif %}
+    <a href="{% url 'colecoes' %}" class="mais" aria-label="Gerenciar coleções" title="Gerenciar coleções">＋</a>
+  </nav>
+
   {% include "colecao/_barra.html" with dados=progresso serie=None %}
 
+  {% if pode_editar %}
+  <div class="acoes-catalogo">
+    <a href="{% url 'nova_serie' colecao.pk %}">＋ Série</a>
+    <a href="{% url 'valores_colecao' colecao.pk %}">Valores</a>
+    <a href="{% url 'editar_colecao' colecao.pk %}">Editar coleção</a>
+  </div>
+  {% endif %}
+
+  {% if secoes %}
   <div class="busca">
-    <input type="search" name="q" placeholder="Achei uma moeda… ex.: 50 2008" autocomplete="off"
+    <input type="search" name="q" placeholder="Achei uma moeda… ex.: {% if colecao.e_real %}50 2008{% else %}25 1999{% endif %}" autocomplete="off"
            hx-get="{% url 'buscar' %}" hx-trigger="input changed delay:250ms, search" hx-target="#resultados">
+    {% if colecao.e_real %}
     <small>Digite valor e/ou ano (<b>50 2008</b>, <b>1 real 2019</b>, <b>5c 2019a</b>) ou tema (<b>natação</b>, <b>banco central</b>). Para marcar moedas, toque em <b>Editar</b> no topo.</small>
+    {% else %}
+    <small>Digite valor e/ou ano (<b>25 1999</b>), o nome do valor ou o tema. Para marcar moedas, toque em <b>Editar</b> no topo.</small>
+    {% endif %}
   </div>
   <div id="resultados"></div>
+  {% endif %}
 
   {% for rotulo, series in secoes %}
     <h2>{{ rotulo }}</h2>
     <div class="series">
       {% for s in series %}
-        <a class="serie-card{% if s.tenho == s.total %} completa{% endif %}" href="{% url 'serie' s.pk %}">
-          <div class="linha1">{{ s.nome }}<span>{{ s.tenho }}/{{ s.total }}{% if s.tenho == s.total %} ✓{% endif %}</span></div>
+        <a class="serie-card{% if s.total and s.tenho == s.total %} completa{% endif %}" href="{% url 'serie' s.pk %}">
+          <div class="linha1">{{ s.nome }}<span>{{ s.tenho }}/{{ s.total }}{% if s.total and s.tenho == s.total %} ✓{% endif %}</span></div>
           <div class="barra"><i style="width: {% widthratio s.tenho s.total 100 %}%"></i></div>
         </a>
       {% endfor %}
     </div>
+  {% empty %}
+    {% if pode_editar %}
+    <section class="cartao passos">
+      <h3>Monte o catálogo de “{{ colecao.nome }}”</h3>
+      <ol>
+        <li><a href="{% url 'valores_colecao' colecao.pk %}">Cadastre os valores</a> (ex.: 1 Cent, 5 Cents, 25 Cents).</li>
+        <li><a href="{% url 'nova_serie' colecao.pk %}">Crie uma série</a> (ex.: Moedas de circulação).</li>
+        <li>Dentro da série, adicione as moedas — dá para cadastrar vários anos de uma vez.</li>
+      </ol>
+    </section>
+    {% else %}
+    <p class="vazio">Nenhuma moeda cadastrada nesta coleção ainda.</p>
+    {% endif %}
   {% endfor %}
 {% endblock %}

@@ -1,5 +1,8 @@
 """Carrega o catálogo de moedas do Plano Real (lista de controle 1994–2026).
 
+Cria a coleção oficial "Real" (sem dono, igual para todos) se ainda não existir.
+Moedas novas do Real entram aqui (get_or_create) ou pelo admin, e aparecem para todos.
+
 Idempotente: pode rodar quantas vezes quiser; só cria o que ainda não existe
 e nunca apaga nada nem mexe na sua coleção.
 
@@ -8,7 +11,7 @@ e nunca apaga nada nem mexe na sua coleção.
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from colecao.models import Denominacao, Moeda, Serie
+from colecao.models import Colecao, Denominacao, Moeda, Serie
 
 DENOMINACOES = [
     ("1 Centavo", 1),
@@ -84,10 +87,13 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **opts):
         criadas = 0
+        real, _ = Colecao.objects.get_or_create(
+            slug=Colecao.SLUG_REAL, defaults={"nome": "Real", "simbolo": "R$"}
+        )
         denom = {}
         for nome, valor in DENOMINACOES:
             denom[valor], _ = Denominacao.objects.get_or_create(
-                valor_centavos=valor, defaults={"nome": nome}
+                colecao=real, valor_centavos=valor, defaults={"nome": nome}
             )
 
         ordem_serie = 0
@@ -96,7 +102,7 @@ class Command(BaseCommand):
             nonlocal ordem_serie
             ordem_serie += 10
             obj, _ = Serie.objects.get_or_create(
-                nome=nome, defaults={"tipo": tipo, "ordem": ordem_serie}
+                colecao=real, nome=nome, defaults={"tipo": tipo, "ordem": ordem_serie}
             )
             return obj
 
@@ -113,7 +119,7 @@ class Command(BaseCommand):
             criadas += int(nova)
 
         for nome_familia, por_denom in FAMILIAS.items():
-            s = serie(nome_familia, Serie.Tipo.FAMILIA)
+            s = serie(nome_familia, Serie.Tipo.CIRCULACAO)
             for valor, rotulos in por_denom.items():
                 for rotulo in rotulos:
                     ano, variante = separar_variante(rotulo)
@@ -124,11 +130,11 @@ class Command(BaseCommand):
             moeda(s, valor, ano, descricao=descricao, ordem=i)
 
         for nome_serie, ano, temas in OLIMPIADAS:
-            s = serie(nome_serie, Serie.Tipo.OLIMPIADA)
+            s = serie(nome_serie, Serie.Tipo.COMEMORATIVA)  # na seção Comemorativas, depois da série "Comemorativas"
             for i, tema in enumerate(temas):
                 moeda(s, 100, ano, descricao=tema, ordem=i)
 
-        total = Moeda.objects.count()
+        total = Moeda.objects.filter(serie__colecao=real).count()
         self.stdout.write(
             self.style.SUCCESS(f"Catálogo pronto: {criadas} moeda(s) nova(s), {total} no total.")
         )

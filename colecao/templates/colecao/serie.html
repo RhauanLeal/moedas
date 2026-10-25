@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block titulo %}{{ serie }} · Moedas do Real{% endblock %}
 {% block conteudo %}
-  <a class="voltar" href="{% url 'inicio' %}">‹ Início</a>
+  <a class="voltar" href="{% url 'inicio' %}">‹ {% if serie.colecao.e_real %}Início{% else %}{{ serie.colecao.nome }}{% endif %}</a>
   <h1>{{ serie }}</h1>
   {% include "colecao/_barra.html" with dados=progresso_serie serie=serie faltam=faltando %}
 
@@ -10,7 +10,14 @@
     <a href="?faltando=1" {% if faltando %}class="ativo"{% endif %}>Só as que faltam</a>
   </div>
   <a class="compartilhar-link" href="{% url 'compartilhar' %}?serie={{ serie.pk }}">📤 Compartilhar com amigos</a>
+  {% if pode_editar %}
+  <div class="acoes-catalogo">
+    <a href="{% url 'nova_moeda' serie.pk %}">＋ Moedas</a>
+    <a href="{% url 'editar_serie' serie.pk %}">Editar série</a>
+    <a href="{% url 'valores_colecao' serie.colecao_id %}">Valores</a>
+  </div>
+  {% endif %}
 
   {% include "colecao/_grupos_denominacao.html" %}
-  {% if not grupos %}<p class="vazio">{% if faltando %}Série completa! 🎉{% else %}Nenhuma moeda cadastrada nesta série.{% endif %}</p>{% endif %}
+  {% if not grupos %}<p class="vazio">{% if faltando %}Série completa! 🎉{% else %}Nenhuma moeda cadastrada nesta série.{% if pode_editar %} <a href="{% url 'nova_moeda' serie.pk %}">Adicionar moedas</a>{% endif %}{% endif %}</p>{% endif %}
 {% endblock %}

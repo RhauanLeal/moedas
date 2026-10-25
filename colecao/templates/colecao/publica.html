@@ -4,21 +4,26 @@
   <meta name="robots" content="noindex, nofollow">
   <meta property="og:type" content="website">
   <meta property="og:title" content="{{ og_titulo }}">
-  <meta property="og:description" content="Acompanhe a coleção de moedas do Plano Real.">
+  <meta property="og:description" content="{% if colecao.e_real %}Acompanhe a coleção de moedas do Plano Real.{% else %}Acompanhe a coleção: {{ colecao.nome }}.{% endif %}">
   <meta property="og:image" content="{{ og_imagem }}">
   <meta property="og:url" content="{{ request.build_absolute_uri }}">
 {% endblock %}
 {% block conteudo %}
   <div class="pub-topo">
     <h1>Coleção de {{ perfil.nome_exibido }}</h1>
-    <p class="vazio" style="padding:0">Moedas do Real · somente leitura</p>
+    <p class="vazio" style="padding:0">{{ colecao.titulo }} · somente leitura</p>
   </div>
+  {% if colecoes|length > 1 %}
+  <nav class="seletor-colecoes centro" aria-label="Coleções">
+    {% for c in colecoes %}<a href="?colecao={{ c.pk }}{% if ver != 'todas' %}&ver={{ ver }}{% endif %}"{% if c.pk == colecao.pk %} class="ativo" aria-current="true"{% endif %}>{{ c.nome }}</a>{% endfor %}
+  </nav>
+  {% endif %}
   {% include "colecao/_barra.html" with dados=progresso serie=None %}
 
   <div class="filtros">
-    <a href="?" {% if ver == "todas" %}class="ativo"{% endif %}>Todas</a>
-    <a href="?ver=faltam" {% if ver == "faltam" %}class="ativo"{% endif %}>Faltam</a>
-    <a href="?ver=repetidas" {% if ver == "repetidas" %}class="ativo"{% endif %}>Repetidas</a>
+    <a href="?colecao={{ colecao.pk }}" {% if ver == "todas" %}class="ativo"{% endif %}>Todas</a>
+    <a href="?colecao={{ colecao.pk }}&ver=faltam" {% if ver == "faltam" %}class="ativo"{% endif %}>Faltam</a>
+    <a href="?colecao={{ colecao.pk }}&ver=repetidas" {% if ver == "repetidas" %}class="ativo"{% endif %}>Repetidas</a>
   </div>
 
   {% for g in grupos %}

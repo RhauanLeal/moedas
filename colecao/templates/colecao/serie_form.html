@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}{% if serie %}Editar série{% else %}Nova série{% endif %} · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <a class="voltar" href="{% if serie %}{% url 'serie' serie.pk %}{% else %}{% url 'inicio' %}{% endif %}">‹ Voltar</a>
+  <h1>{% if serie %}Editar “{{ serie.nome }}”{% else %}Nova série · {{ colecao.nome }}{% endif %}</h1>
+  {% if not serie %}<p class="vazio" style="padding-top:0">Uma série agrupa moedas parecidas: as de circulação comum, uma série comemorativa etc.</p>{% endif %}
+
+  <form method="post" class="form-catalogo">
+    {% csrf_token %}
+    {% include "colecao/_campos.html" %}
+    <button class="btn largo" type="submit">{% if serie %}Salvar{% else %}Criar série{% endif %}</button>
+  </form>
+
+  {% if serie %}
+  <section class="cartao zona-perigo">
+    <h3>Excluir série</h3>
+    <p class="vazio">Apaga a série com as {{ total }} moeda(s) dela, as fotos e o que você marcou nelas.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn perigo largo" name="acao" value="excluir"
+              onclick="return confirm('Excluir a série “{{ serie.nome|escapejs }}” e as {{ total }} moeda(s) dela?')">Excluir série</button>
+    </form>
+  </section>
+  {% endif %}
+{% endblock %}

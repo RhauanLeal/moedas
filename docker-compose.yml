@@ -10,3 +10,9 @@ services:
     # (em dev, o banco é alcançado pelo túnel SSH: DB_HOST=host.docker.internal, DB_PORT=<porta do túnel>)
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    # Fotos enviadas pelos usuários (sobrevivem a rebuilds; entram no backup)
+    volumes:
+      - media:/app/media
+
+volumes:
+  media:

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}Valores · {{ colecao.nome }} · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <a class="voltar" href="{% url 'inicio' %}">‹ {{ colecao.nome }}</a>
+  <h1>Valores das moedas</h1>
+  <p class="vazio" style="padding-top:0">Os valores que existem nesta coleção (ex.: 1 Cent, 5 Cents, 25 Cents, 1 Dollar). Cada moeda é de um valor.</p>
+
+  {% for valor, f in valores %}
+    <form method="post" class="cartao valor-linha">
+      {% csrf_token %}
+      <input type="hidden" name="id" value="{{ valor.pk }}">
+      <div class="valor-campos">
+        <label>Nome {{ f.nome }}</label>
+        <label>Centavos {{ f.valor_centavos }}</label>
+      </div>
+      <div class="acoes">
+        <button class="btn sec" name="acao" value="salvar">Salvar</button>
+        <button class="btn perigo" name="acao" value="excluir"
+                {% if valor.n %}disabled title="Tem {{ valor.n }} moeda(s) cadastrada(s)"{% else %}onclick="return confirm('Excluir o valor {{ valor.nome|escapejs }}?')"{% endif %}>Excluir</button>
+      </div>
+      {% if valor.n %}<small class="ajuda">{{ valor.n }} moeda(s) com este valor.</small>{% endif %}
+    </form>
+  {% empty %}
+    <p class="vazio">Nenhum valor ainda. Adicione o primeiro abaixo.</p>
+  {% endfor %}
+
+  <section class="cartao">
+    <h3>Adicionar valor</h3>
+    <form method="post" class="form-catalogo">
+      {% csrf_token %}
+      {% include "colecao/_campos.html" %}
+      <button class="btn largo" name="acao" value="adicionar">Adicionar</button>
+    </form>
+  </section>
+
+  {% if valores %}
+    {% if tem_serie %}
+      <a class="btn sec largo" href="{% url 'inicio' %}">Voltar para a coleção</a>
+    {% else %}
+      <a class="btn largo" href="{% url 'nova_serie' colecao.pk %}">Próximo passo: criar uma série ›</a>
+    {% endif %}
+  {% endif %}
+{% endblock %}

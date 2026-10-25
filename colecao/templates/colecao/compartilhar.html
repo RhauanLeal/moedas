@@ -2,7 +2,7 @@
 {% block titulo %}Compartilhar · Moedas do Real{% endblock %}
 {% block conteudo %}
   <a class="voltar" href="{% if serie %}{% url 'serie' serie.pk %}{% else %}{% url 'faltando' %}{% endif %}">‹ Voltar</a>
-  <h1>Compartilhar</h1>
+  <h1>Compartilhar{% if not colecao.e_real %} · {{ colecao.nome }}{% endif %}</h1>
 
   <div class="filtros">
     <a href="?tipo=faltam{% if serie %}&serie={{ serie.pk }}{% endif %}" {% if tipo == "faltam" %}class="ativo"{% endif %}>O que falta</a>

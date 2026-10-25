@@ -45,13 +45,13 @@ def carregar_mapa():
 
 def chave_do_desenho(moeda):
     """Chave do desenho em fotos.json, ou None se não houver foto para esta moeda."""
-    tipo = moeda.serie.tipo
+    serie = moeda.serie
     valor = moeda.denominacao.valor_centavos
-    if tipo == Serie.Tipo.FAMILIA:
-        familia = "f1" if moeda.serie.nome.startswith("1") else "f2"
+    if serie.tipo == Serie.Tipo.CIRCULACAO:  # 1ª e 2ª Família
+        familia = "f1" if serie.nome.startswith("1") else "f2"
         return f"{familia}-{valor}{moeda.variante}"
-    if tipo == Serie.Tipo.COMEMORATIVA:
-        return COMEMORATIVAS.get((valor, moeda.ano))
-    if tipo == Serie.Tipo.OLIMPIADA:
+    if serie.nome.startswith("Olimpíadas"):
         return "oli-" + slugify(moeda.descricao)
+    if serie.tipo == Serie.Tipo.COMEMORATIVA:
+        return COMEMORATIVAS.get((valor, moeda.ano))
     return None

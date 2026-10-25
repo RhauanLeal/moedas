@@ -6,12 +6,12 @@
 
   {% if moeda.tem_foto %}
   <div class="fotos">
-    {% if moeda.foto_cara %}<figure><img src="{% static moeda.foto_cara %}" alt="Cara da moeda {{ moeda.denominacao }} {{ moeda.ano_rotulo }}" width="160" height="160" loading="lazy"><figcaption>Cara</figcaption></figure>{% endif %}
-    {% if moeda.foto_coroa %}<figure><img src="{% static moeda.foto_coroa %}" alt="Coroa da moeda {{ moeda.denominacao }} {{ moeda.ano_rotulo }}" width="160" height="160" loading="lazy"><figcaption>Coroa</figcaption></figure>{% endif %}
+    {% if moeda.url_cara %}<figure><img src="{{ moeda.url_cara }}" alt="Cara da moeda {{ moeda.denominacao }} {{ moeda.ano_rotulo }}" width="160" height="160" loading="lazy"><figcaption>Cara</figcaption></figure>{% endif %}
+    {% if moeda.url_coroa %}<figure><img src="{{ moeda.url_coroa }}" alt="Coroa da moeda {{ moeda.denominacao }} {{ moeda.ano_rotulo }}" width="160" height="160" loading="lazy"><figcaption>Coroa</figcaption></figure>{% endif %}
   </div>
   {% endif %}
   {% if moeda.como_identificar %}<p class="dica"><strong>Como identificar:</strong> {{ moeda.como_identificar }}</p>{% endif %}
-  {% if moeda.tem_foto %}<p class="credito">Foto ilustrativa do desenho (o ano muda). {{ moeda.foto_credito }}</p>{% endif %}
+  {% if moeda.foto_credito %}<p class="credito">Foto ilustrativa do desenho (o ano muda). {{ moeda.foto_credito }}</p>{% endif %}
 
   <label for="{{ form.quantidade.id_for_label }}">{{ form.quantidade.label }}</label>
   <div class="contador">
@@ -35,6 +35,7 @@
     <button class="btn sec" type="button" onclick="document.getElementById('ficha').close()">Fechar</button>
     <button class="btn" type="submit">Salvar</button>
   </div>
+  {% if pode_editar %}<p class="editar-catalogo"><a href="{% url 'editar_moeda' moeda.pk %}">Editar no catálogo (valor, ano, fotos…)</a></p>{% endif %}
   {% if item.quantidade %}
   <div class="acoes">
     <button class="btn perigo" type="submit" name="acao" value="remover"

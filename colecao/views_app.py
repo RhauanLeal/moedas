@@ -14,7 +14,7 @@ from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.http import Http404
 
-from .models import Aviso, InscricaoPush, PerfilPublico, novo_token
+from .models import Aviso, Colecao, InscricaoPush, Moeda, PerfilPublico, novo_token
 from .pix import payload_pix, qr_svg
 from .views import agrupar_por_serie, moedas_com_colecao, progresso, series_com_progresso
 
@@ -38,6 +38,19 @@ def conta(request):
             "contas_sociais": request.user.socialaccount_set.all(),
         },
     )
+
+
+def bloqueado_por_seguranca(request):
+    """Trocar o e-mail ou conectar outra conta foi desligado: quem pegasse o celular levaria a conta.
+
+    Para usar outro e-mail: baixar o backup em Coleções e importar na conta nova.
+    """
+    messages.error(
+        request,
+        "Por segurança, o e-mail da conta não pode ser trocado. Para usar outro e-mail, "
+        "baixe o backup em Coleções e importe na conta nova.",
+    )
+    return redirect("conta")
 
 
 @login_required
@@ -71,25 +84,37 @@ def colecao_publica(request, token):
     perfil = get_object_or_404(PerfilPublico.objects.select_related("user"), token=token, ativo=True)
     ver = request.GET.get("ver")
     ver = ver if ver in ("faltam", "repetidas") else "todas"
-    moedas = moedas_com_colecao(perfil.user)
+    # Mostra as coleções que a pessoa usa (oficiais e próprias, menos as que ela ocultou).
+    colecoes = list(Colecao.objects.ativas_para(perfil.user))
+    pedida = request.GET.get("colecao", "")
+    colecao = next((c for c in colecoes if str(c.pk) == pedida), colecoes[0] if colecoes else None)
+    if colecao is None:
+        raise Http404
+    moedas = moedas_com_colecao(perfil.user, Moeda.objects.filter(serie__colecao=colecao))
     if ver == "faltam":
         moedas = moedas.filter(qtd=0)
     elif ver == "repetidas":
         moedas = moedas.filter(qtd__gte=2)
-    por_serie = {s.pk: s for s in series_com_progresso(perfil.user)}
+    por_serie = {s.pk: s for s in series_com_progresso(perfil.user, colecao)}
     grupos = agrupar_por_serie(list(moedas))
     for g in grupos:
         g["resumo"] = por_serie[g["serie"].pk]
-    dados = progresso(perfil.user)
+    dados = progresso(perfil.user, colecao)
+    if colecao.e_real:
+        og_titulo = f"Coleção de moedas do Real de {perfil.nome_exibido} – {dados['tenho']}/{dados['total']}"
+    else:
+        og_titulo = f"{colecao.titulo} · coleção de {perfil.nome_exibido} – {dados['tenho']}/{dados['total']}"
     resp = render(
         request,
         "colecao/publica.html",
         {
             "perfil": perfil,
             "ver": ver,
+            "colecao": colecao,
+            "colecoes": colecoes,
             "grupos": grupos,
             "progresso": dados,
-            "og_titulo": f"Coleção de moedas do Real de {perfil.nome_exibido} – {dados['tenho']}/{dados['total']}",
+            "og_titulo": og_titulo,
             "og_imagem": request.build_absolute_uri(static("icones/icone-512.png")),
         },
     )
@@ -113,6 +138,8 @@ def excluir_conta(request):
                 return redirect("excluir_conta")
         user = request.user
         logout(request)
+        for colecao in user.colecoes.all():  # catálogos próprios e fotos enviadas
+            colecao.apagar()
         user.delete()  # apaga também a coleção, inscrições de notificação e logins do Google
         messages.success(request, "Sua conta e sua coleção foram excluídas.")
         return redirect("account_login")

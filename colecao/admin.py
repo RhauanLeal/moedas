@@ -1,27 +1,43 @@
 from django.contrib import admin, messages
 
-from .models import Aviso, Denominacao, InscricaoPush, ItemColecao, Moeda, PerfilPublico, Serie
+from .models import Aviso, Colecao, Denominacao, InscricaoPush, ItemColecao, Moeda, PerfilPublico, Serie
 from .push import enviar_aviso, push_configurado
+
+
+@admin.register(Colecao)
+class ColecaoAdmin(admin.ModelAdmin):
+    list_display = ("nome", "dono", "simbolo", "slug", "ordem")
+    list_filter = (("dono", admin.EmptyFieldListFilter),)
+    search_fields = ("nome", "dono__email", "dono__username")
+    raw_id_fields = ("dono",)
+    exclude = ("ocultada_por",)
 
 
 @admin.register(Serie)
 class SerieAdmin(admin.ModelAdmin):
-    list_display = ("nome", "tipo", "ordem")
+    list_display = ("nome", "colecao", "tipo", "ordem")
     list_editable = ("ordem",)
-    list_filter = ("tipo",)
+    list_filter = ("colecao", "tipo")
+    list_select_related = ("colecao",)
 
 
 @admin.register(Denominacao)
 class DenominacaoAdmin(admin.ModelAdmin):
-    list_display = ("nome", "valor_centavos")
+    list_display = ("nome", "valor_centavos", "colecao")
+    list_filter = ("colecao",)
+    list_select_related = ("colecao",)
 
 
 @admin.register(Moeda)
 class MoedaAdmin(admin.ModelAdmin):
-    list_display = ("denominacao", "ano", "variante", "descricao", "serie", "com_foto")
-    list_filter = ("serie__tipo", "serie", "denominacao")
-    search_fields = ("busca",)
-    list_select_related = ("serie", "denominacao")
+    list_display = ("denominacao", "ano", "variante", "descricao", "serie", "dono", "com_foto")
+    list_filter = ("serie__colecao", "serie__tipo")
+    search_fields = ("busca", "serie__colecao__dono__email", "serie__colecao__dono__username")
+    list_select_related = ("serie__colecao__dono", "denominacao")
+
+    @admin.display(description="Dono", ordering="serie__colecao__dono")
+    def dono(self, obj):
+        return obj.serie.colecao.dono
     actions = ["criar_aviso"]
 
     @admin.display(boolean=True, description="Foto")
@@ -30,6 +46,9 @@ class MoedaAdmin(admin.ModelAdmin):
 
     @admin.action(description="Avisar os usuários sobre estas moedas (notificação)")
     def criar_aviso(self, request, queryset):
+        if queryset.filter(serie__colecao__dono__isnull=False).exists():
+            self.message_user(request, "Avisos só para moedas de coleções oficiais (as dos usuários são privadas).", messages.ERROR)
+            return
         moedas = list(queryset.select_related("serie", "denominacao")[:5])
         if not moedas:
             return
@@ -49,7 +68,7 @@ class MoedaAdmin(admin.ModelAdmin):
 @admin.register(ItemColecao)
 class ItemColecaoAdmin(admin.ModelAdmin):
     list_display = ("moeda", "user", "quantidade", "estado", "atualizado_em")
-    list_filter = ("estado", "moeda__serie")
+    list_filter = ("estado", "moeda__serie__colecao")
     search_fields = ("moeda__busca", "user__email", "user__username")
     autocomplete_fields = ("moeda",)
     raw_id_fields = ("user",)

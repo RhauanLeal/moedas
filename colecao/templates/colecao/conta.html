@@ -6,14 +6,14 @@
   <section class="cartao">
     <p class="conta-email">{{ user.email|default:user.username }}</p>
     {% if contas_sociais %}<p class="vazio" style="padding:0">Conectada ao Google</p>{% endif %}
+    <p class="vazio" style="padding:4px 0 0;font-size:13px">Por segurança, o e-mail não pode ser trocado. Para usar outro, baixe o <a href="{% url 'colecoes' %}#backup">backup</a> e importe na conta nova.</p>
     <div class="lista-links">
+      <a href="{% url 'colecoes' %}">Minhas coleções (criar, ocultar ou excluir)</a>
       {% if tem_senha %}
         <a href="{% url 'account_change_password' %}">Trocar senha</a>
       {% else %}
         <a href="{% url 'account_set_password' %}">Criar uma senha (para entrar sem o Google)</a>
       {% endif %}
-      <a href="{% url 'account_email' %}">E-mails da conta</a>
-      {% if provedores_sociais %}<a href="{% url 'socialaccount_connections' %}">Contas conectadas</a>{% endif %}
       {% if user.is_staff %}<a href="{% url 'admin:index' %}">Administração (catálogo e avisos)</a>{% endif %}
     </div>
   </section>

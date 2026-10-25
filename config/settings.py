@@ -115,6 +115,9 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+# Fotos enviadas pelos usuários (coleções próprias). No Docker fica num volume (ver docker-compose.yml).
+MEDIA_URL = "/media/"
+MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT") or BASE_DIR / "media")
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
@@ -136,7 +139,7 @@ SOCIALACCOUNT_ADAPTER = "colecao.adapters.ContaSocialAdapter"
 ACCOUNT_LOGIN_METHODS = {"email", "username"}  # e-mail para todos; usuário "rhauan" continua valendo
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_CHANGE_EMAIL = True  # um e-mail por conta: trocar substitui o atual após confirmar o novo
+ACCOUNT_CHANGE_EMAIL = True  # um e-mail por conta; a tela de trocar fica bloqueada em config/urls.py (segurança)
 ACCOUNT_SESSION_REMEMBER = True
 # none = entra direto após cadastrar; mandatory = exige confirmar o e-mail (precisa de SMTP)
 ACCOUNT_EMAIL_VERIFICATION = os.environ.get("ACCOUNT_EMAIL_VERIFICATION") or "none"

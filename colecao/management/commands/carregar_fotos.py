@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from colecao.fotos import DICAS, carregar_mapa, chave_do_desenho
-from colecao.models import Moeda
+from colecao.models import Colecao, Moeda
 
 
 class Command(BaseCommand):
@@ -22,7 +22,9 @@ class Command(BaseCommand):
     def handle(self, *args, **opts):
         mapa = carregar_mapa()
         com_foto = sem_foto = 0
-        for moeda in Moeda.objects.select_related("serie", "denominacao"):
+        # Só o Real: as fotos de static/moedas/ são dele (coleções dos usuários têm upload próprio).
+        moedas = Moeda.objects.filter(serie__colecao__slug=Colecao.SLUG_REAL)
+        for moeda in moedas.select_related("serie", "denominacao"):
             chave = chave_do_desenho(moeda)
             desenho = mapa.get(chave)
             if not desenho:

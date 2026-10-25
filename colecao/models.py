@@ -1,15 +1,22 @@
 """Modelo de dados.
 
-Catálogo (o que existe, igual para todos):  Serie -> Moeda <- Denominacao
-Coleção (o que cada pessoa tem):           ItemColecao (1 por usuário + moeda)
+Catálogo (o que existe):          Colecao -> Serie -> Moeda <- Denominacao
+Coleção (o que cada pessoa tem):  ItemColecao (1 por usuário + moeda)
 
+Uma Colecao sem dono é oficial e igual para todos (o Real, mantido pelo admin e pelo carregar_catalogo):
+o usuário só marca e pode ocultar. Com dono é privada: só aquele usuário vê e edita o catálogo dela.
 Cada "bolinha" do PDF é uma Moeda: série + denominação + ano (+ variante/descrição).
 """
 import secrets
 import unicodedata
+import uuid
 
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
+from django.db.models import F, Q
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+from django.templatetags.static import static
 
 
 def normalizar(texto: str) -> str:
@@ -18,40 +25,134 @@ def normalizar(texto: str) -> str:
     return "".join(c for c in texto if not unicodedata.combining(c)).lower()
 
 
+class ColecaoQuerySet(models.QuerySet):
+    def visiveis_para(self, user):
+        """Oficiais + as criadas por este usuário (inclusive as que ele ocultou)."""
+        return self.filter(Q(dono__isnull=True) | Q(dono=user))
+
+    def ativas_para(self, user):
+        """Visíveis e não ocultas: as que aparecem no seletor da tela inicial."""
+        return self.visiveis_para(user).exclude(ocultada_por=user)
+
+
+class Colecao(models.Model):
+    SLUG_REAL = "real"
+
+    nome = models.CharField(max_length=60)
+    simbolo = models.CharField("símbolo", max_length=8, blank=True, help_text='Ex.: "R$", "US$", "€".')
+    slug = models.SlugField(
+        max_length=30, unique=True, null=True, blank=True,
+        help_text='Só nas coleções oficiais carregadas por comando (o Real é "real").',
+    )
+    dono = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True,
+        related_name="colecoes", help_text="Vazio = coleção oficial, igual para todos.",
+    )
+    ordem = models.PositiveIntegerField(default=0)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    ocultada_por = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, blank=True, related_name="colecoes_ocultas"
+    )
+
+    objects = ColecaoQuerySet.as_manager()
+
+    class Meta:
+        ordering = [F("dono").asc(nulls_first=True), "ordem", "nome"]  # oficiais primeiro
+        verbose_name = "coleção"
+        verbose_name_plural = "coleções"
+        constraints = [
+            models.UniqueConstraint(fields=["dono", "nome"], name="colecao_nome_unico_por_dono")
+        ]
+
+    def __str__(self):
+        return self.nome
+
+    @property
+    def oficial(self):
+        return self.dono_id is None
+
+    @property
+    def e_real(self):
+        return self.slug == self.SLUG_REAL
+
+    @property
+    def titulo(self):
+        """Usado nos textos de compartilhar e na página pública."""
+        return "Moedas do Real" if self.e_real else f"Moedas – {self.nome}"
+
+    @transaction.atomic
+    def apagar(self):
+        """Exclui a coleção com todo o catálogo dela (e as fotos, pelo sinal de Moeda).
+
+        As moedas protegem séries e valores (PROTECT), então a ordem importa.
+        """
+        Moeda.objects.filter(serie__colecao=self).delete()
+        self.series.all().delete()
+        self.denominacoes.all().delete()
+        self.delete()
+
+
 class Serie(models.Model):
     class Tipo(models.TextChoices):
-        FAMILIA = "FAMILIA", "Família"
+        CIRCULACAO = "CIRCULACAO", "Circulação"
         COMEMORATIVA = "COMEMORATIVA", "Comemorativa"
-        OLIMPIADA = "OLIMPIADA", "Olimpíadas"
         OUTRA = "OUTRA", "Outra"
 
+    colecao = models.ForeignKey(
+        Colecao, on_delete=models.PROTECT, related_name="series", verbose_name="coleção"
+    )
     tipo = models.CharField(max_length=20, choices=Tipo.choices)
-    nome = models.CharField(max_length=120, unique=True)
+    nome = models.CharField(max_length=120)
     ordem = models.PositiveIntegerField(default=0, help_text="Posição na tela inicial")
 
     class Meta:
         ordering = ["ordem", "nome"]
         verbose_name = "série"
         verbose_name_plural = "séries"
+        constraints = [
+            models.UniqueConstraint(fields=["colecao", "nome"], name="serie_nome_unico_na_colecao")
+        ]
 
     def __str__(self):
         return self.nome
 
 
 class Denominacao(models.Model):
-    nome = models.CharField(max_length=40, unique=True)
-    valor_centavos = models.PositiveIntegerField(unique=True)
+    colecao = models.ForeignKey(
+        Colecao, on_delete=models.PROTECT, related_name="denominacoes", verbose_name="coleção"
+    )
+    nome = models.CharField(max_length=40)
+    valor_centavos = models.PositiveIntegerField(
+        help_text="Valor na menor unidade da moeda (centavos, cents…): ordena e ajuda na busca."
+    )
 
     class Meta:
         ordering = ["valor_centavos"]
         verbose_name = "denominação"
         verbose_name_plural = "denominações"
+        constraints = [
+            models.UniqueConstraint(fields=["colecao", "nome"], name="denominacao_nome_unico_na_colecao"),
+            models.UniqueConstraint(
+                fields=["colecao", "valor_centavos"], name="denominacao_valor_unico_na_colecao"
+            ),
+        ]
 
     def __str__(self):
         return self.nome
 
 
+def caminho_foto(instance, filename):
+    """Fotos enviadas pelos usuários: nome aleatório, separado por dono da coleção."""
+    return f"fotos/{instance.serie.colecao.dono_id or 0}/{uuid.uuid4().hex}.webp"
+
+
 class Moeda(models.Model):
+    class Metal(models.TextChoices):
+        PRATA = "prata", "Prateada"
+        COBRE = "cobre", "Cobre"
+        LATAO = "latao", "Dourada (latão)"
+        BIMETAL = "bimetal", "Bimetálica"
+
     serie = models.ForeignKey(Serie, on_delete=models.PROTECT, related_name="moedas")
     denominacao = models.ForeignKey(Denominacao, on_delete=models.PROTECT, related_name="moedas")
     ano = models.PositiveSmallIntegerField()
@@ -71,6 +172,15 @@ class Moeda(models.Model):
         help_text='Caminho dentro de static/, ex.: "moedas/f2-5-coroa.webp" (lado do valor).',
     )
     foto_credito = models.CharField("crédito das fotos", max_length=400, blank=True)
+    imagem_cara = models.ImageField(
+        "foto enviada (cara)", upload_to=caminho_foto, blank=True,
+        help_text="Foto enviada pelo usuário; tem prioridade sobre a foto da cara em static/.",
+    )
+    imagem_coroa = models.ImageField("foto enviada (coroa)", upload_to=caminho_foto, blank=True)
+    cor_metal = models.CharField(
+        "cor do metal", max_length=10, choices=Metal.choices, blank=True,
+        help_text="Cor do chip quando a moeda está marcada. Vazio = automático.",
+    )
     como_identificar = models.TextField(
         "como identificar", blank=True,
         help_text='Dica para distinguir esta moeda de outra parecida. Ex.: "Letra A no canto inferior esquerdo".',
@@ -91,12 +201,28 @@ class Moeda(models.Model):
         return f"{self.ano}{self.variante}"
 
     @property
+    def url_cara(self):
+        if self.imagem_cara:
+            return self.imagem_cara.url
+        return static(self.foto_cara) if self.foto_cara else ""
+
+    @property
+    def url_coroa(self):
+        if self.imagem_coroa:
+            return self.imagem_coroa.url
+        return static(self.foto_coroa) if self.foto_coroa else ""
+
+    @property
     def tem_foto(self):
-        return bool(self.foto_cara or self.foto_coroa)
+        return bool(self.foto_cara or self.foto_coroa or self.imagem_cara or self.imagem_coroa)
 
     @property
     def metal(self):
         """Cor aproximada do metal, só para a tela ficar parecida com a moeda real."""
+        if self.cor_metal:
+            return self.cor_metal
+        if not self.serie.colecao.e_real:
+            return "prata"
         if self.ano < 1998:  # 1ª família (aço inox), inclusive as FAO de 1995
             return "prata"
         return {1: "cobre", 5: "cobre", 10: "latao", 25: "latao", 50: "prata"}.get(
@@ -118,6 +244,26 @@ class Moeda(models.Model):
         ]
         self.busca = normalizar(" ".join(partes))[:300]
         super().save(*args, **kwargs)
+
+
+def apagar_foto_se_orfa(nome, storage):
+    """Apaga o arquivo depois do commit, se nenhuma moeda usa mais (uma faixa de anos divide a mesma foto)."""
+    if not nome:
+        return
+
+    def apagar():
+        if not Moeda.objects.filter(Q(imagem_cara=nome) | Q(imagem_coroa=nome)).exists():
+            storage.delete(nome)
+
+    transaction.on_commit(apagar)
+
+
+@receiver(post_delete, sender=Moeda)
+def apagar_fotos_enviadas(sender, instance, **kwargs):
+    """Moeda excluída (sozinha, com a coleção ou com a conta): apaga os arquivos das fotos."""
+    for campo in (instance.imagem_cara, instance.imagem_coroa):
+        if campo:
+            apagar_foto_se_orfa(campo.name, campo.storage)
 
 
 class ItemColecao(models.Model):

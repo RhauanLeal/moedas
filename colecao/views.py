@@ -6,21 +6,56 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count, OuterRef, Subquery, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from .models import ItemColecao, Moeda, Serie, normalizar
+from .models import Colecao, ItemColecao, Moeda, Serie, normalizar
+
+CHAVE_COLECAO_ATUAL = "colecao_atual"
+
+
+# ---------- coleções (o que cada usuário pode ver) ----------
+
+def colecoes_visiveis(user):
+    """Oficiais + as do próprio usuário. Toda busca de série/moeda por pk passa por aqui."""
+    return Colecao.objects.visiveis_para(user)
+
+
+def moedas_visiveis(user):
+    return Moeda.objects.filter(serie__colecao__in=colecoes_visiveis(user))
+
+
+def series_visiveis(user):
+    return Serie.objects.filter(colecao__in=colecoes_visiveis(user))
+
+
+def colecao_atual(request):
+    """Coleção que a pessoa está vendo (guardada na sessão; padrão: a primeira ativa, o Real).
+
+    None quando todas estão ocultas (ou não há nenhuma): as telas mandam para "Coleções".
+    """
+    pk = request.session.get(CHAVE_COLECAO_ATUAL)
+    if pk:
+        # aberta de propósito vale mesmo se estiver oculta
+        colecao = colecoes_visiveis(request.user).filter(pk=pk).first()
+        if colecao:
+            return colecao
+    return Colecao.objects.ativas_para(request.user).first()
+
+
+def definir_colecao_atual(request, colecao):
+    request.session[CHAVE_COLECAO_ATUAL] = colecao.pk
 
 
 # ---------- consultas ----------
 
 def moedas_com_colecao(user, qs=None):
     """Moedas do catálogo anotadas com a quantidade/estado da coleção DESTE usuário."""
-    qs = qs if qs is not None else Moeda.objects.all()
+    qs = qs if qs is not None else moedas_visiveis(user)
     meus = ItemColecao.objects.filter(user=user, moeda=OuterRef("pk"))
-    return qs.select_related("serie", "denominacao").annotate(
+    return qs.select_related("serie__colecao", "denominacao").annotate(
         qtd=Coalesce(Subquery(meus.values("quantidade")[:1]), Value(0)),
         estado=Subquery(meus.values("estado")[:1]),
     )
@@ -30,12 +65,15 @@ def _pct(tenho, total):
     return round(100 * tenho / total) if total else 0
 
 
-def progresso(user, serie=None):
-    moedas = Moeda.objects.all()
+def progresso(user, colecao=None, serie=None):
+    """Totais de uma série ou, sem série, da coleção inteira."""
     itens = ItemColecao.objects.filter(user=user, quantidade__gt=0)
     if serie is not None:
-        moedas = moedas.filter(serie=serie)
+        moedas = Moeda.objects.filter(serie=serie)
         itens = itens.filter(moeda__serie=serie)
+    else:
+        moedas = Moeda.objects.filter(serie__colecao=colecao)
+        itens = itens.filter(moeda__serie__colecao=colecao)
     total, tenho = moedas.count(), itens.count()
     return {
         "total": total,
@@ -46,13 +84,15 @@ def progresso(user, serie=None):
     }
 
 
-def series_com_progresso(user):
+def series_com_progresso(user, colecao):
     tenho_por_serie = dict(
-        ItemColecao.objects.filter(user=user, quantidade__gt=0)
+        ItemColecao.objects.filter(user=user, quantidade__gt=0, moeda__serie__colecao=colecao)
         .values_list("moeda__serie")
         .annotate(n=Count("id"))
     )
-    series = list(Serie.objects.annotate(total=Count("moedas")).order_by("ordem", "nome"))
+    series = list(
+        Serie.objects.filter(colecao=colecao).annotate(total=Count("moedas")).order_by("ordem", "nome")
+    )
     for s in series:
         s.tenho = tenho_por_serie.get(s.pk, 0)
         s.pct = _pct(s.tenho, s.total)
@@ -87,8 +127,11 @@ PALAVRAS_REAL = {"real", "reais", "r$"}
 PALAVRAS_CENTAVO = {"centavo", "centavos", "cent", "cents", "ct", "cts", "c"}
 
 
-def interpretar_busca(q):
-    """Transforma '50 2008', '1 real 2019', '5c 2019a' ou 'natacao' em filtros."""
+def interpretar_busca(q, valores_validos=VALORES_VALIDOS):
+    """Transforma '50 2008', '1 real 2019', '5c 2019a' ou 'natacao' em filtros.
+
+    valores_validos: valores (em centavos) das denominações da coleção onde se busca.
+    """
     tokens = normalizar(q).replace(",", " ").replace("$", "$ ").split()
     tem_real = any(t in PALAVRAS_REAL for t in tokens)
     tem_centavo = any(t in PALAVRAS_CENTAVO for t in tokens)
@@ -97,14 +140,14 @@ def interpretar_busca(q):
     for t in tokens:
         if t in PALAVRAS_REAL or t in PALAVRAS_CENTAVO:
             continue
-        m = re.fullmatch(r"(19\d{2}|20\d{2})([a-z]?)", t)
+        m = re.fullmatch(r"(1[6-9]\d{2}|20\d{2})([a-z]?)", t)
         if m:
             anos.add(int(m.group(1)))
             if m.group(2):
                 variantes.add(m.group(2).upper())
             continue
-        m = re.fullmatch(r"(\d{1,3})(c|ct|cts|cent|centavos?)?", t)
-        if m and int(m.group(1)) in VALORES_VALIDOS:
+        m = re.fullmatch(r"(\d{1,4})(c|ct|cts|cent|centavos?)?", t)
+        if m and int(m.group(1)) in valores_validos:
             n = int(m.group(1))
             if n == 1 and not m.group(2):
                 if tem_real and not tem_centavo:
@@ -112,23 +155,24 @@ def interpretar_busca(q):
                 elif tem_centavo and not tem_real:
                     valores.add(1)
                 else:
-                    valores.update({1, 100})
+                    valores.update({1, 100} & set(valores_validos))
             else:
                 valores.add(n)
             continue
         if len(t) >= 2:
             textos.append(t)
 
-    if tem_real and not valores:
+    if tem_real and not valores and 100 in valores_validos:
         valores.add(100)
     return {"anos": anos, "variantes": variantes, "valores": valores, "textos": textos}
 
 
-def buscar_moedas(user, q):
-    f = interpretar_busca(q)
+def buscar_moedas(user, q, colecao):
+    validos = set(colecao.denominacoes.values_list("valor_centavos", flat=True))
+    f = interpretar_busca(q, validos)
     if not any(f.values()):
         return None
-    qs = Moeda.objects.all()
+    qs = Moeda.objects.filter(serie__colecao=colecao)
     if f["anos"]:
         qs = qs.filter(ano__in=f["anos"])
     if f["variantes"]:
@@ -144,12 +188,18 @@ def buscar_moedas(user, q):
 
 @login_required
 def inicio(request):
-    series = series_com_progresso(request.user)
+    colecao = colecao_atual(request)
+    if colecao is None:
+        return redirect("colecoes")
+    series = series_com_progresso(request.user, colecao)
     return render(
         request,
         "colecao/inicio.html",
         {
-            "progresso": progresso(request.user),
+            "colecao": colecao,
+            "colecoes": Colecao.objects.ativas_para(request.user),
+            "pode_editar": colecao.dono_id == request.user.pk,
+            "progresso": progresso(request.user, colecao),
             "secoes": [
                 (rotulo, [s for s in series if s.tipo == tipo])
                 for tipo, rotulo in Serie.Tipo.choices
@@ -160,8 +210,15 @@ def inicio(request):
 
 
 @login_required
+def abrir_colecao(request, pk):
+    definir_colecao_atual(request, get_object_or_404(colecoes_visiveis(request.user), pk=pk))
+    return redirect("inicio")
+
+
+@login_required
 def serie_detalhe(request, pk):
-    serie = get_object_or_404(Serie, pk=pk)
+    serie = get_object_or_404(series_visiveis(request.user).select_related("colecao"), pk=pk)
+    definir_colecao_atual(request, serie.colecao)  # "‹ Início" volta para a coleção desta série
     faltando = request.GET.get("faltando") == "1"
     moedas = moedas_com_colecao(request.user, serie.moedas.all())
     if faltando:
@@ -172,38 +229,52 @@ def serie_detalhe(request, pk):
         {
             "serie": serie,
             "faltando": faltando,
+            "pode_editar": serie.colecao.dono_id == request.user.pk,
             "grupos": agrupar_por_denominacao(list(moedas)),
-            "progresso_serie": progresso(request.user, serie),
+            "progresso_serie": progresso(request.user, serie=serie),
         },
     )
 
 
 @login_required
 def faltando(request):
-    moedas = moedas_com_colecao(request.user).filter(qtd=0)
+    colecao = colecao_atual(request)
+    if colecao is None:
+        return redirect("colecoes")
+    moedas = moedas_com_colecao(request.user, Moeda.objects.filter(serie__colecao=colecao)).filter(qtd=0)
     return render(
         request,
         "colecao/faltando.html",
-        {"grupos": agrupar_por_serie(list(moedas)), "progresso": progresso(request.user)},
+        {
+            "colecao": colecao,
+            "grupos": agrupar_por_serie(list(moedas)),
+            "progresso": progresso(request.user, colecao),
+        },
     )
 
 
 @login_required
 def buscar(request):
+    colecao = colecao_atual(request)
     q = request.GET.get("q", "").strip()[:100]
-    moedas = buscar_moedas(request.user, q) if q else None
+    moedas = buscar_moedas(request.user, q, colecao) if q and colecao else None
     return render(
         request,
         "colecao/_resultados.html",
-        {"q": q, "grupos": agrupar_por_serie(list(moedas)) if moedas is not None else None},
+        {
+            "q": q,
+            "colecao": colecao,
+            "pode_editar": colecao is not None and colecao.dono_id == request.user.pk,
+            "grupos": agrupar_por_serie(list(moedas)) if moedas is not None else None,
+        },
     )
 
 
 # ---------- compartilhar ----------
 
-def texto_compartilhar(user, tipo, serie=None):
+def texto_compartilhar(user, tipo, colecao, serie=None):
     """Mensagem pronta para WhatsApp: moedas que faltam ou repetidas para troca, por série."""
-    moedas = moedas_com_colecao(user)
+    moedas = moedas_com_colecao(user, Moeda.objects.filter(serie__colecao=colecao))
     if serie is not None:
         moedas = moedas.filter(serie=serie)
     repetidas = tipo == "repetidas"
@@ -217,10 +288,10 @@ def texto_compartilhar(user, tipo, serie=None):
 
     onde = f" da série {serie.nome}" if serie else ""
     if repetidas:
-        linhas = [f"🪙 Moedas do Real repetidas{onde} (tenho para troca):"]
+        linhas = [f"🪙 {colecao.titulo} repetidas{onde} (tenho para troca):"]
     else:
-        total = Moeda.objects.filter(serie=serie).count() if serie else Moeda.objects.count()
-        linhas = [f"🪙 Moedas do Real que me faltam{onde} ({len(moedas)} de {total}):"]
+        todas = Moeda.objects.filter(serie=serie) if serie else Moeda.objects.filter(serie__colecao=colecao)
+        linhas = [f"🪙 {colecao.titulo} que me faltam{onde} ({len(moedas)} de {todas.count()}):"]
 
     for g in agrupar_por_serie(moedas):
         linhas += ["", f"*{g['serie'].nome}*"]
@@ -235,15 +306,20 @@ def compartilhar(request):
     tipo = "repetidas" if request.GET.get("tipo") == "repetidas" else "faltam"
     serie = None
     if request.GET.get("serie", "").isdigit():
-        serie = get_object_or_404(Serie, pk=int(request.GET["serie"]))
+        serie = get_object_or_404(series_visiveis(request.user), pk=int(request.GET["serie"]))
+        definir_colecao_atual(request, serie.colecao)
+    colecao = colecao_atual(request)
+    if colecao is None:
+        return redirect("colecoes")
     return render(
         request,
         "colecao/compartilhar.html",
         {
             "tipo": tipo,
             "serie": serie,
-            "texto": texto_compartilhar(request.user, tipo, serie),
-            "series": Serie.objects.all(),
+            "colecao": colecao,
+            "texto": texto_compartilhar(request.user, tipo, colecao, serie),
+            "series": colecao.series.all(),
         },
     )
 
@@ -260,7 +336,9 @@ def resposta_moeda(request, moeda_id, extra_headers=None):
     html += render_to_string(
         "colecao/_barra.html",
         {
-            "dados": progresso(request.user, moeda.serie) if na_serie else progresso(request.user),
+            "dados": progresso(request.user, serie=moeda.serie)
+            if na_serie
+            else progresso(request.user, moeda.serie.colecao),
             "serie": moeda.serie if na_serie else None,
             # Em "O que falta" e no filtro "Só as que faltam" a barra mostra quantas faltam.
             "faltam": url_atual.path == reverse("faltando")
@@ -279,7 +357,7 @@ def resposta_moeda(request, moeda_id, extra_headers=None):
 @require_POST
 def marcar(request, pk):
     """Um toque numa moeda que não tenho: marca 1 unidade."""
-    moeda = get_object_or_404(Moeda, pk=pk)
+    moeda = get_object_or_404(moedas_visiveis(request.user), pk=pk)
     item, _ = ItemColecao.objects.get_or_create(user=request.user, moeda=moeda)
     if item.quantidade == 0:
         item.quantidade = 1
@@ -311,7 +389,7 @@ class ItemForm(forms.ModelForm):
 @login_required
 def ficha(request, pk):
     """Ficha da moeda (abre num painel por baixo da tela)."""
-    moeda = get_object_or_404(Moeda.objects.select_related("serie", "denominacao"), pk=pk)
+    moeda = get_object_or_404(moedas_visiveis(request.user).select_related("serie__colecao", "denominacao"), pk=pk)
     item, _ = ItemColecao.objects.get_or_create(user=request.user, moeda=moeda)
 
     if request.method == "POST":
@@ -327,4 +405,13 @@ def ficha(request, pk):
     else:
         form = ItemForm(instance=item)
 
-    return render(request, "colecao/_ficha.html", {"moeda": moeda, "item": item, "form": form})
+    return render(
+        request,
+        "colecao/_ficha.html",
+        {
+            "moeda": moeda,
+            "item": item,
+            "form": form,
+            "pode_editar": moeda.serie.colecao.dono_id == request.user.pk,
+        },
+    )

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titulo %}{% if moeda %}Editar moeda{% else %}Novas moedas{% endif %} · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <a class="voltar" href="{% url 'serie' serie.pk %}">‹ {{ serie.nome }}</a>
+  <h1>{% if moeda %}Editar {{ moeda.denominacao }} {{ moeda.ano_rotulo }}{% else %}Adicionar moedas{% endif %}</h1>
+
+  <form method="post" enctype="multipart/form-data" class="form-catalogo">
+    {% csrf_token %}
+    {% include "colecao/_campos.html" with campos=form.campos_principais %}
+
+    <h3>Fotos (opcional)</h3>
+    <p class="vazio" style="padding:0 0 4px">Pode tirar com a câmera do celular. A foto é reduzida automaticamente e só você vê.{% if not moeda %} Numa faixa de anos, a mesma foto vale para todas.{% endif %}</p>
+    <div class="fotos-form">
+      {% for lado, campo, remover, url in form.lados_foto %}
+      <div class="foto-campo">
+        <span class="rotulo">{{ campo.label }}</span>
+        {% if url %}<img src="{{ url }}" alt="{{ campo.label }} atual" width="120" height="120">{% endif %}
+        {{ campo }}
+        {% if remover and url %}<label class="campo-checkbox">{{ remover }}<span>Remover</span></label>{% endif %}
+        {% for e in campo.errors %}<p class="erro">{{ e }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="acoes">
+      {% if not moeda %}<button class="btn sec" type="submit" name="continuar" value="1">Salvar e adicionar outra</button>{% endif %}
+      <button class="btn" type="submit">Salvar</button>
+    </div>
+  </form>
+
+  {% if moeda %}
+  <section class="cartao zona-perigo">
+    <h3>Excluir moeda</h3>
+    <p class="vazio">Tira a moeda do catálogo, junto com o que você marcou nela.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn perigo largo" name="acao" value="excluir"
+              onclick="return confirm('Excluir {{ moeda.denominacao|escapejs }} {{ moeda.ano_rotulo }} do catálogo?')">Excluir moeda</button>
+    </form>
+  </section>
+  {% endif %}
+{% endblock %}

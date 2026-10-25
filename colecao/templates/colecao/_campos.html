@@ -1,0 +1,11 @@
+{% for e in form.non_field_errors %}<p class="erro">{{ e }}</p>{% endfor %}
+{% for campo in campos|default:form.visible_fields %}
+  {% if campo.widget_type == "checkbox" %}
+    <label class="campo-checkbox">{{ campo }}<span>{{ campo.label }}</span></label>
+  {% else %}
+    <label class="rotulo" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+    {{ campo }}
+  {% endif %}
+  {% if campo.help_text %}<small class="ajuda">{{ campo.help_text }}</small>{% endif %}
+  {% for e in campo.errors %}<p class="erro">{{ e }}</p>{% endfor %}
+{% endfor %}

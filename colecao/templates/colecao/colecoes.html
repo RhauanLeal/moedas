@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}Coleções · Moedas do Real{% endblock %}
+{% block conteudo %}
+  <h1>Coleções</h1>
+  <p class="vazio" style="padding-top:0">Além do Real, você pode montar coleções suas (ex.: Dólar americano) com os valores, anos e fotos que quiser. Só você vê as suas coleções.</p>
+
+  <div class="series">
+    {% for c in lista %}
+      <div class="serie-card colecao-card{% if c.oculta %} oculta{% endif %}{% if atual and c.pk == atual.pk %} atual{% endif %}">
+        <a class="linha1" href="{% url 'abrir_colecao' c.pk %}">{{ c.nome }}{% if c.simbolo %} <small>{{ c.simbolo }}</small>{% endif %}<span>{{ c.tenho }}/{{ c.total }}</span></a>
+        <div class="barra"><i style="width: {{ c.pct }}%"></i></div>
+        <div class="colecao-info">
+          <span>{% if c.oficial %}Oficial{% else %}Criada por você{% endif %}{% if c.oculta %} · oculta{% endif %}{% if atual and c.pk == atual.pk %} · aberta agora{% endif %}</span>
+          <span class="colecao-botoes">
+            <a href="{% url 'exportar_colecao' c.pk %}" title="Baixar planilha (abre no Excel)">Exportar</a>
+            {% if c.tenho %}
+            <form method="post" action="{% url 'zerar_colecao' c.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="perigo-link"
+                      onclick="return confirm('Apagar tudo o que você marcou em “{{ c.nome|escapejs }}” ({{ c.tenho }} moeda(s), com estado, datas e observações)? O catálogo continua. Dica: exporte a planilha antes.')">Zerar</button>
+            </form>
+            {% endif %}
+            {% if not c.oficial %}<a href="{% url 'editar_colecao' c.pk %}">Editar</a>{% endif %}
+            <form method="post" action="{% url 'ocultar_colecao' c.pk %}">
+              {% csrf_token %}
+              <button type="submit">{% if c.oculta %}Mostrar{% else %}Ocultar{% endif %}</button>
+            </form>
+          </span>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if pode_criar %}
+    <a class="btn largo" href="{% url 'nova_colecao' %}" style="margin-top:18px">＋ Nova coleção</a>
+  {% else %}
+    <p class="vazio">Você chegou ao limite de coleções.</p>
+  {% endif %}
+  <p class="vazio">Ocultar só tira a coleção da tela inicial: o que você marcou continua guardado.
+    Zerar apaga só o que você marcou, para começar de novo. Exportar baixa uma planilha com a coleção.</p>
+
+  <section class="cartao" id="backup">
+    <h3>Backup</h3>
+    <p class="vazio">Baixe uma planilha (abre no Excel) com todas as suas coleções e o que você marcou. Guarde como cópia de segurança ou, para usar outro e-mail, crie a conta nova e importe a planilha nela. As fotos que você enviou não vão na planilha.</p>
+    <a class="btn sec largo" href="{% url 'exportar_tudo' %}">Baixar backup</a>
+    <form method="post" action="{% url 'importar_backup' %}" enctype="multipart/form-data" class="form-catalogo">
+      {% csrf_token %}
+      <label class="rotulo" for="arquivo-backup">Importar backup</label>
+      <input type="file" id="arquivo-backup" name="arquivo" accept=".csv,text/csv" required>
+      <small class="ajuda">Coleções, séries e moedas que faltarem são criadas (no Real, só as marcações voltam). As moedas da planilha ficam com a quantidade, o estado, a data e a observação dela.</small>
+      <button class="btn largo" type="submit">Importar</button>
+    </form>
+  </section>
+{% endblock %}

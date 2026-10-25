@@ -12,6 +12,7 @@ RUN pip install -r requirements.txt
 COPY . .
 RUN python manage.py collectstatic --noinput -v0 \
  && chmod +x entrypoint.sh \
+ && mkdir -p media \
  && useradd --create-home --uid 1000 app \
  && chown -R app:app /app
 USER app

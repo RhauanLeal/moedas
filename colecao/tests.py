@@ -8,7 +8,7 @@ from unittest import mock
 
 from django.test import override_settings
 
-from .models import Aviso, InscricaoPush, ItemColecao, Moeda, PerfilPublico, Serie
+from .models import Aviso, Colecao, Denominacao, InscricaoPush, ItemColecao, Moeda, PerfilPublico, Serie
 from .views import interpretar_busca
 
 
@@ -19,13 +19,11 @@ class CatalogoTests(TestCase):
 
     def test_total_igual_ao_pdf(self):
         self.assertEqual(Moeda.objects.count(), 193)
-        por_tipo = {
-            Serie.Tipo.FAMILIA: 167,
-            Serie.Tipo.COMEMORATIVA: 9,
-            Serie.Tipo.OLIMPIADA: 17,
-        }
-        for tipo, total in por_tipo.items():
-            self.assertEqual(Moeda.objects.filter(serie__tipo=tipo).count(), total, tipo)
+        self.assertEqual(Moeda.objects.filter(serie__nome__endswith="Família").count(), 167)
+        self.assertEqual(Moeda.objects.filter(serie__nome="Comemorativas").count(), 9)
+        self.assertEqual(Moeda.objects.filter(serie__nome__startswith="Olimpíadas").count(), 17)
+        self.assertEqual(Moeda.objects.filter(serie__tipo=Serie.Tipo.CIRCULACAO).count(), 167)
+        self.assertEqual(Moeda.objects.filter(serie__tipo=Serie.Tipo.COMEMORATIVA).count(), 26)
 
     def test_idempotente(self):
         call_command("carregar_catalogo", verbosity=0)
@@ -77,11 +75,13 @@ class TelasTests(TestCase):
     def test_ordem_series_inicio(self):
         r = self.client.get(reverse("inicio"))
         secoes = dict(r.context["secoes"])
-        nomes_familia = [s.nome for s in secoes["Família"]]
-        self.assertEqual(nomes_familia, ["1ª Família", "2ª Família"])
-        nomes_olimpiadas = [s.nome for s in secoes["Olimpíadas"]]
-        self.assertEqual(nomes_olimpiadas[0], "Olimpíadas 2012 – Entrega da Bandeira")
-        self.assertEqual(nomes_olimpiadas[1], "Olimpíadas 2014 – 1ª Série")
+        self.assertEqual(list(secoes), ["Circulação", "Comemorativa"])
+        nomes_circulacao = [s.nome for s in secoes["Circulação"]]
+        self.assertEqual(nomes_circulacao, ["1ª Família", "2ª Família"])
+        nomes_comemorativas = [s.nome for s in secoes["Comemorativa"]]
+        self.assertEqual(nomes_comemorativas[0], "Comemorativas")
+        self.assertEqual(nomes_comemorativas[1], "Olimpíadas 2012 – Entrega da Bandeira")
+        self.assertEqual(nomes_comemorativas[2], "Olimpíadas 2014 – 1ª Série")
 
     def test_busca(self):
         r = self.client.get(reverse("buscar"), {"q": "50 2008"})
@@ -197,18 +197,31 @@ class ContasTests(TestCase):
         r = self.client.post(reverse("account_login"), {"login": "nova@ex.com", "password": "Moeda-forte-2026"})
         self.assertRedirects(r, reverse("inicio"), fetch_redirect_response=False)
 
-    def test_trocar_email_substitui_em_vez_de_acumular(self):
+    def test_nao_troca_email_nem_conecta_outra_conta(self):
         from allauth.account.models import EmailAddress
+        from allauth.core.exceptions import ImmediateHttpResponse
+        from allauth.socialaccount.models import SocialLogin
+        from django.test import RequestFactory
+
+        from .adapters import ContaSocialAdapter
 
         u = User.objects.create_user("ana", "ana@ex.com", "senha-de-teste-123")
         EmailAddress.objects.create(user=u, email="ana@ex.com", primary=True, verified=True)
         self.client.force_login(u)
-        for novo in ("novo1@ex.com", "novo2@ex.com"):
-            self.client.post(reverse("account_email"), {"action_add": "", "email": novo})
-        pendentes = EmailAddress.objects.filter(user=u, verified=False)
-        self.assertEqual(pendentes.count(), 1)
-        self.assertEqual(pendentes.get().email, "novo2@ex.com")
-        self.assertEqual(EmailAddress.objects.filter(user=u).count(), 2)  # atual + 1 pendente
+        for url in ("/contas/email/", "/contas/3rdparty/"):
+            self.assertRedirects(self.client.get(url), reverse("conta"), fetch_redirect_response=False)
+        r = self.client.post("/contas/email/", {"action_add": "", "email": "ladrao@ex.com"})
+        self.assertRedirects(r, reverse("conta"), fetch_redirect_response=False)
+        self.assertEqual(list(EmailAddress.objects.filter(user=u).values_list("email", flat=True)), ["ana@ex.com"])
+        self.assertNotContains(self.client.get(reverse("conta")), "/contas/email/")
+
+        request = RequestFactory().get("/")
+        request.session = self.client.session
+        request._messages = mock.MagicMock()
+        login = SocialLogin(user=User(email="ladrao@ex.com"))
+        login.state = {"process": "connect"}
+        with self.assertRaises(ImmediateHttpResponse):
+            ContaSocialAdapter(request).pre_social_login(request, login)
 
     def test_login_por_usuario_antigo(self):
         User.objects.create_user("rhauan", "", "senha-de-teste-123")
@@ -454,7 +467,7 @@ class ColecaoPublicaTests(TestCase):
         r = self.client.get(reverse("colecao_publica", args=[perfil.token]))
         self.assertContains(r, "Coleção de Rhauan")
         self.assertContains(r, "1</span>")
-        for proibido in ("segredo@ex.com", "achei na padaria", "FC"):
+        for proibido in ("segredo@ex.com", "achei na padaria", '<span class="est">FC</span>'):
             self.assertNotContains(r, proibido)
         self.assertIn("noindex", r["X-Robots-Tag"])
         self.assertEqual(self.client.get(reverse("colecao_publica", args=[perfil.token]), {"ver": "repetidas"}).status_code, 200)
