@@ -1,8 +1,16 @@
 <div id="{% if serie %}progresso-serie-{{ serie.pk }}{% else %}progresso-total{% endif %}" class="progresso{% if serie %} compacto{% endif %}"{% if oob %} hx-swap-oob="true"{% endif %}>
   <div class="numeros">
+{% if faltam %}
+    <span class="grande">{{ dados.faltam }}</span>
+    <span class="de">de {{ dados.total }} moedas faltando</span>
+    <span class="pct">{{ dados.pct_faltam }}%</span>
+  </div>
+  <div class="barra"><i style="width: {{ dados.pct_faltam }}%"></i></div>
+{% else %}
     <span class="grande">{{ dados.tenho }}</span>
     <span class="de">de {{ dados.total }} moedas</span>
     <span class="pct">{{ dados.pct }}%</span>
   </div>
   <div class="barra"><i style="width: {{ dados.pct }}%"></i></div>
+{% endif %}
 </div>

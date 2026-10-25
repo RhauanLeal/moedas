@@ -113,6 +113,38 @@ class TelasTests(TestCase):
         r = self.client.post(reverse("ficha", args=[m.pk]), {"acao": "remover"})
         self.assertEqual(ItemColecao.objects.get(user=self.user, moeda=m).quantidade, 0)
 
+    def test_faltando_mostra_quantas_faltam(self):
+        ItemColecao.objects.create(user=self.user, moeda=Moeda.objects.first(), quantidade=1)
+        r = self.client.get(reverse("faltando"))
+        self.assertContains(r, '<span class="grande">192</span>')
+        self.assertContains(r, "de 193 moedas faltando")
+        self.assertContains(r, '<span class="pct">99%</span>')
+
+        # Marcar uma moeda na tela "O que falta" atualiza a barra no mesmo modo
+        m = Moeda.objects.last()
+        url = "http://testserver" + reverse("faltando")
+        r = self.client.post(reverse("marcar", args=[m.pk]), headers={"HX-Current-URL": url})
+        self.assertContains(r, '<span class="grande">191</span>')
+        r = self.client.post(reverse("marcar", args=[m.pk]), headers={"HX-Current-URL": "http://testserver/"})
+        self.assertContains(r, '<span class="grande">2</span>')
+
+    def test_serie_so_as_que_faltam_mostra_quantas_faltam(self):
+        serie = Serie.objects.get(nome="2ª Família")
+        total = serie.moedas.count()
+        ItemColecao.objects.create(user=self.user, moeda=serie.moedas.first(), quantidade=1)
+        url = reverse("serie", args=[serie.pk])
+        self.assertContains(self.client.get(url), '<span class="grande">1</span>')
+        r = self.client.get(url, {"faltando": "1"})
+        self.assertContains(r, f'<span class="grande">{total - 1}</span>')
+        self.assertContains(r, f"de {total} moedas faltando")
+
+        m = serie.moedas.last()
+        r = self.client.post(reverse("marcar", args=[m.pk]), headers={"HX-Current-URL": f"http://testserver{url}?faltando=1"})
+        self.assertContains(r, f'id="progresso-serie-{serie.pk}"')
+        self.assertContains(r, f'<span class="grande">{total - 2}</span>')
+        r = self.client.post(reverse("marcar", args=[m.pk]), headers={"HX-Current-URL": f"http://testserver{url}"})
+        self.assertContains(r, '<span class="grande">2</span>')
+
     def test_ficha_invalida_volta_com_erro(self):
         m = Moeda.objects.first()
         r = self.client.post(reverse("ficha", args=[m.pk]), {"quantidade": -2})

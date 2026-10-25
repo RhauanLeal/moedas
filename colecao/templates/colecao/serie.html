@@ -3,7 +3,7 @@
 {% block conteudo %}
   <a class="voltar" href="{% url 'inicio' %}">‹ Início</a>
   <h1>{{ serie }}</h1>
-  {% include "colecao/_barra.html" with dados=progresso_serie serie=serie %}
+  {% include "colecao/_barra.html" with dados=progresso_serie serie=serie faltam=faltando %}
 
   <div class="filtros">
     <a href="?" {% if not faltando %}class="ativo"{% endif %}>Todas</a>

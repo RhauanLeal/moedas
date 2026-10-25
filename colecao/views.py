@@ -1,5 +1,5 @@
 import re
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from django import forms
 from django.contrib.auth.decorators import login_required
@@ -8,6 +8,7 @@ from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .models import ItemColecao, Moeda, Serie, normalizar
@@ -36,7 +37,13 @@ def progresso(user, serie=None):
         moedas = moedas.filter(serie=serie)
         itens = itens.filter(moeda__serie=serie)
     total, tenho = moedas.count(), itens.count()
-    return {"total": total, "tenho": tenho, "pct": _pct(tenho, total)}
+    return {
+        "total": total,
+        "tenho": tenho,
+        "pct": _pct(tenho, total),
+        "faltam": total - tenho,
+        "pct_faltam": _pct(total - tenho, total),
+    }
 
 
 def series_com_progresso(user):
@@ -248,12 +255,16 @@ def resposta_moeda(request, moeda_id, extra_headers=None):
     moeda = moedas_com_colecao(request.user).get(pk=moeda_id)
     html = render_to_string("colecao/_chip.html", {"m": moeda, "oob": True}, request=request)
     # Atualiza só o contador que existe na tela atual (série ou total).
-    na_serie = urlparse(request.headers.get("HX-Current-URL", "")).path.startswith("/serie/")
+    url_atual = urlparse(request.headers.get("HX-Current-URL", ""))
+    na_serie = url_atual.path.startswith("/serie/")
     html += render_to_string(
         "colecao/_barra.html",
         {
             "dados": progresso(request.user, moeda.serie) if na_serie else progresso(request.user),
             "serie": moeda.serie if na_serie else None,
+            # Em "O que falta" e no filtro "Só as que faltam" a barra mostra quantas faltam.
+            "faltam": url_atual.path == reverse("faltando")
+            or (na_serie and parse_qs(url_atual.query).get("faltando") == ["1"]),
             "oob": True,
         },
         request=request,
